@@ -3,6 +3,9 @@ data/geojson/
 temp/
 test/
 
+# Keep essential lookup tables
+!data/lookup/
+
 # Python
 __pycache__/
 *.py[cod]
