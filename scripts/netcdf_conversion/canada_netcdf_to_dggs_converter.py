@@ -20,7 +20,7 @@ class CanadaNetCDFToDGGSConverterAggregated:
     making the process more standardized and efficient.
     """
     
-    def __init__(self, netcdf_folder, geojson_path, output_folder):
+    def __init__(self, netcdf_folder, geojson_path, output_folder, num_cores=None):
         """
         Initialize the converter.
         
@@ -28,10 +28,17 @@ class CanadaNetCDFToDGGSConverterAggregated:
             netcdf_folder (str): Path to folder containing NetCDF files
             geojson_path (str): Path to the DGGS GeoJSON file
             output_folder (str): Path to output folder for CSV files
+            num_cores (int): Number of CPU cores to use for parallel processing
         """
         self.netcdf_folder = netcdf_folder
         self.geojson_path = geojson_path
         self.output_folder = output_folder
+        
+        # Set number of cores from environment or parameter
+        if num_cores is None:
+            self.num_cores = int(os.environ.get('NUM_CORES', 8))
+        else:
+            self.num_cores = num_cores
         
         # Setup logging
         self._setup_logging()
@@ -62,12 +69,6 @@ class CanadaNetCDFToDGGSConverterAggregated:
     
     def _setup_logging(self):
         """Setup logging to both console and file."""
-        # Check if logging is already configured to prevent multiple log files
-        if logging.getLogger().handlers:
-            # Logging already configured, just get the logger
-            self.logger = logging.getLogger(__name__)
-            return
-        
         # Create log folder if it doesn't exist
         log_folder = "log"
         os.makedirs(log_folder, exist_ok=True)
@@ -77,17 +78,29 @@ class CanadaNetCDFToDGGSConverterAggregated:
         log_filename = f"canada_netcdf_to_dggs_conversion_{timestamp}.log"
         log_path = os.path.join(log_folder, log_filename)
         
-        # Setup logging configuration
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_path),
-                logging.StreamHandler()
-            ]
-        )
+        # Create a new logger specifically for this script
+        self.logger = logging.getLogger(f"canada_converter_{timestamp}")
+        self.logger.setLevel(logging.INFO)
         
-        self.logger = logging.getLogger(__name__)
+        # Clear any existing handlers to avoid conflicts
+        self.logger.handlers.clear()
+        
+        # Create formatter
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        
+        # Add file handler
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+        
+        # Add console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+        
+        # Prevent propagation to root logger to avoid duplicate messages
+        self.logger.propagate = False
+        
         self.log_path = log_path
         self.log_message(f"Logging initialized. Log file: {log_path}")
     
@@ -131,6 +144,7 @@ class CanadaNetCDFToDGGSConverterAggregated:
     def aggregate_variables_by_ipcc_code(self, nc_data):
         """
         Aggregate variables by IPCC2006 codes using the lookup table.
+        New policy: skip variables not in lookup table and report them.
         
         Args:
             nc_data (xarray.Dataset): NetCDF dataset
@@ -158,9 +172,10 @@ class CanadaNetCDFToDGGSConverterAggregated:
                 ipcc_groups[ipcc_code].append(var)
             else:
                 unmapped_variables.append(var)
+                self.log_message(f"  Skipping variable '{var}' - not found in IPCC lookup table")
         
         if unmapped_variables:
-            self.log_message(f"  Warning: {len(unmapped_variables)} variables not found in IPCC lookup table:")
+            self.log_message(f"  Skipped {len(unmapped_variables)} variables not found in IPCC lookup table:")
             for var in unmapped_variables:
                 self.log_message(f"    {var}")
         
@@ -446,8 +461,8 @@ class CanadaNetCDFToDGGSConverterAggregated:
         """
         self.log_message(f"    Processing {len(ipcc_codes)} aggregated IPCC2006 codes in parallel using raster-first approach...")
         
-        # Determine number of processes to use
-        num_processes = min(len(ipcc_codes), multiprocessing.cpu_count(), 8)
+        # Determine number of processes to use - use self.num_cores
+        num_processes = min(len(ipcc_codes), self.num_cores)
         self.log_message(f"    Using {num_processes} parallel processes")
         
         # Create partial function with fixed arguments
@@ -606,8 +621,8 @@ def main():
     """
     Main function to run the aggregated NetCDF to DGGS conversion.
     """
-    # Configuration
-    netcdf_folder = "E:/UCalgary_postdoc/data_source/GridInventory/2018_Canada_Anthropogenic_Methane_Emissions"
+    # Configuration - Updated paths for HPC
+    netcdf_folder = "/home/mingke.li/GridInventory/2018_Canada_Anthropogenic_Methane_Emissions"
     geojson_path = "data/geojson/global_countries_dggs_merge/Canada_CAN_grid.geojson"
     output_folder = "output"
     
@@ -620,7 +635,7 @@ def main():
         print(f"Error: GeoJSON file not found: {geojson_path}")
         return
     
-    # Create converter
+    # Create converter with HPC configuration
     converter = CanadaNetCDFToDGGSConverterAggregated(netcdf_folder, geojson_path, output_folder)
     
     # Process all NetCDF files and combine into single CSV

@@ -22,22 +22,39 @@ _WORKER_COUNTRY_CACHE = {}
 
 
 def _setup_logger():
-    if logging.getLogger().handlers:
-        return logging.getLogger(__name__), None
+    # Create log folder if it doesn't exist
     log_folder = "log"
     os.makedirs(log_folder, exist_ok=True)
+    
+    # Create log filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"global_gfei_netcdf_to_dggs_optimize_{timestamp}.log"
+    log_filename = f"global_gfei_netcdf_to_dggs_conversion_{timestamp}.log"
     log_path = os.path.join(log_folder, log_filename)
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_path),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger(__name__), log_path
+    
+    # Create a new logger specifically for this script
+    logger = logging.getLogger(f"gfei_converter_{timestamp}")
+    logger.setLevel(logging.INFO)
+    
+    # Clear any existing handlers to avoid conflicts
+    logger.handlers.clear()
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    
+    # Add file handler
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # Add console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # Prevent propagation to root logger to avoid duplicate messages
+    logger.propagate = False
+    
+    return logger, log_path
 
 
 def _bounds_intersect(b1, b2):
@@ -197,14 +214,21 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
     - Preserves numerical logic and output format
     """
 
-    def __init__(self, year_to_folder, geojson_folder, output_folder, max_processes=8, chunk_size_pixels=20000):
+    def __init__(self, year_to_folder, geojson_folder, output_folder, max_processes=None, chunk_size_pixels=20000):
         self.year_to_folder = year_to_folder
         self.geojson_folder = geojson_folder
         self.output_folder = output_folder
-        self.max_processes = max_processes
+        
+        # Set number of processes from environment or parameter
+        if max_processes is None:
+            self.max_processes = int(os.environ.get('NUM_CORES', 8))
+        else:
+            self.max_processes = max_processes
+            
         self.chunk_size_pixels = chunk_size_pixels
 
         self.logger, self.log_path = _setup_logger()
+        self._log(f"Logging initialized. Log file: {self.log_path}")
         self._log(f"Initialized optimized GFEI converter for years: {sorted(self.year_to_folder.keys())}")
 
         self._log("Loading GFEI variable -> IPCC2006 lookup table...")
@@ -236,9 +260,9 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
         if not os.path.exists(lookup_path):
             raise FileNotFoundError(f"GFEI lookup file not found: {lookup_path}")
         df = pd.read_csv(lookup_path)
-        if 'variable' not in df.columns or 'IPCC 2006 codes' not in df.columns:
-            raise ValueError("Lookup CSV must contain 'variable' and 'IPCC 2006 codes' columns")
-        self.variable_to_ipcc = dict(zip(df['variable'], df['IPCC 2006 codes']))
+        if 'variable' not in df.columns or 'IPCC2006' not in df.columns:
+            raise ValueError("Lookup CSV must contain 'variable' and 'IPCC2006' columns")
+        self.variable_to_ipcc = dict(zip(df['variable'], df['IPCC2006']))
         self._log(f"Loaded {len(self.variable_to_ipcc)} variable mappings")
 
     def _load_merged_country_grids(self):
@@ -460,7 +484,7 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
         variable = self.extract_variable_from_filename(netcdf_filename)
         netcdf_path = os.path.join(folder, netcdf_filename)
         if variable not in self.variable_to_ipcc:
-            self._log(f"  Warning: Variable {variable} not found in lookup table; skipping")
+            self._log(f"  Skipping variable '{variable}' - not found in IPCC lookup table")
             return None
         ipcc_code = self.variable_to_ipcc[variable]
         self._log(f"  Variable {variable} mapped to IPCC2006 code: {ipcc_code}")
@@ -534,7 +558,7 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
 
         # Run dynamic pool on all tasks
         if tasks:
-            num_proc = min(len(self.country_grids), multiprocessing.cpu_count(), self.max_processes)
+            num_proc = min(len(self.country_grids), self.max_processes)
             self._log(f"  Using {num_proc} parallel processes for {len(tasks)} pixel-chunk tasks across {len(to_process_gids)} countries")
             start = time.time()
             with multiprocessing.Pool(processes=num_proc) as pool:
@@ -708,10 +732,11 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
 
 
 def main():
+    # Configuration - Updated paths for HPC
     year_to_folder = {
-        2016: "E:/UCalgary_postdoc/data_source/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2016_v1",
-        2019: "E:/UCalgary_postdoc/data_source/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2019_v2",
-        2020: "E:/UCalgary_postdoc/data_source/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2020_v3",
+        2016: "/home/mingke.li/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2016_v1",
+        2019: "/home/mingke.li/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2019_v2",
+        2020: "/home/mingke.li/GridInventory/2016-2020_Global_Fuel_Exploitation_Inventory_GFEI/2020_v3",
     }
     geojson_folder = "data/geojson"
     output_folder = "output"
@@ -739,5 +764,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

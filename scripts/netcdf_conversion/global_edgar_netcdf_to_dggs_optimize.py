@@ -21,22 +21,39 @@ _WORKER_COUNTRY_CACHE = {}
 
 
 def _setup_logger():
-    if logging.getLogger().handlers:
-        return logging.getLogger(__name__), None
+    # Create log folder if it doesn't exist
     log_folder = "log"
     os.makedirs(log_folder, exist_ok=True)
+    
+    # Create log filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"global_edgar_netcdf_to_dggs_optimize_{timestamp}.log"
+    log_filename = f"global_edgar_netcdf_to_dggs_conversion_{timestamp}.log"
     log_path = os.path.join(log_folder, log_filename)
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_path),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger(__name__), log_path
+    
+    # Create a new logger specifically for this script
+    logger = logging.getLogger(f"edgar_converter_{timestamp}")
+    logger.setLevel(logging.INFO)
+    
+    # Clear any existing handlers to avoid conflicts
+    logger.handlers.clear()
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    
+    # Add file handler
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # Add console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # Prevent propagation to root logger to avoid duplicate messages
+    logger.propagate = False
+    
+    return logger, log_path
 
 
 def _create_temp_raster_from_netcdf(ds):
@@ -208,16 +225,23 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
     Preserves original output structure and resume behavior.
     """
 
-    def __init__(self, edgar_folder, geojson_folder, output_folder, start_year=1970, end_year=2022, max_processes=8, chunk_size_pixels=20000):
+    def __init__(self, edgar_folder, geojson_folder, output_folder, start_year=1970, end_year=2022, max_processes=None, chunk_size_pixels=20000):
         self.edgar_folder = edgar_folder
         self.geojson_folder = geojson_folder
         self.output_folder = output_folder
         self.start_year = start_year
         self.end_year = end_year
-        self.max_processes = max_processes
+        
+        # Set number of processes from environment or parameter
+        if max_processes is None:
+            self.max_processes = int(os.environ.get('NUM_CORES', 8))
+        else:
+            self.max_processes = max_processes
+            
         self.chunk_size_pixels = chunk_size_pixels
 
         self.logger, self.log_path = _setup_logger()
+        self.log_message(f"Logging initialized. Log file: {self.log_path}")
         self.log_message(f"Processing year range: {self.start_year} to {self.end_year}")
 
         self.log_message("Loading EDGAR sector -> IPCC2006 lookup table...")
@@ -250,7 +274,7 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
         if not os.path.exists(lookup_path):
             raise FileNotFoundError(f"EDGAR lookup file not found: {lookup_path}")
         self.edgar_lookup = pd.read_csv(lookup_path)
-        self.sector_to_ipcc = dict(zip(self.edgar_lookup['EDGAR Sector'], self.edgar_lookup['IPCC 2006 codes']))
+        self.sector_to_ipcc = dict(zip(self.edgar_lookup['EDGAR Sector'], self.edgar_lookup['IPCC2006']))
         self.log_message(f"Loaded EDGAR lookup with {len(self.sector_to_ipcc)} sector mappings")
 
     def _load_merged_country_grids(self):
@@ -422,7 +446,7 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
                     self.log_message(f"      Saved empty country file (no non-zero pixels) for {gid}: {path}")
 
         if tasks:
-            num_proc = min(len(self.country_grids), multiprocessing.cpu_count(), self.max_processes)
+            num_proc = min(len(self.country_grids), self.max_processes)
             self.log_message(f"      Using {num_proc} parallel processes for {len(tasks)} pixel-chunk tasks across {len(to_process_gids)} countries")
             start = time.time()
             with multiprocessing.Pool(processes=num_proc) as pool:
@@ -631,10 +655,11 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
 
 
 def main():
-    edgar_folder = "E:/UCalgary_postdoc/data_source/GridInventory/1970-2022_EDGAR_v8.0_Greenhouse_Gas_CH4_Emissions"
+    # Configuration - Updated paths for HPC
+    edgar_folder = "/home/mingke.li/GridInventory/1970-2022_EDGAR_v8.0_Greenhouse_Gas_CH4_Emissions"
     geojson_folder = "data/geojson"
     output_folder = "output"
-    start_year = 2022
+    start_year = 1970
     end_year = 2022
 
     if not os.path.exists(edgar_folder):
@@ -667,5 +692,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

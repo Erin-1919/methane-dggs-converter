@@ -20,7 +20,7 @@ class MexicoNetCDFToDGGSConverterAggregated:
     before raster conversion, making the process more efficient.
     """
     
-    def __init__(self, netcdf_folder, geojson_path, output_folder, area_file_path):
+    def __init__(self, netcdf_folder, geojson_path, output_folder, area_file_path, num_cores=None):
         """
         Initialize the converter.
         
@@ -29,11 +29,18 @@ class MexicoNetCDFToDGGSConverterAggregated:
             geojson_path (str): Path to the Mexico DGGS GeoJSON file
             output_folder (str): Path to output folder for CSV files
             area_file_path (str): Path to Canada area file for area data
+            num_cores (int): Number of CPU cores to use for parallel processing
         """
         self.netcdf_folder = netcdf_folder
         self.geojson_path = geojson_path
         self.output_folder = output_folder
         self.area_file_path = area_file_path
+        
+        # Set number of cores from environment or parameter
+        if num_cores is None:
+            self.num_cores = int(os.environ.get('NUM_CORES', 8))
+        else:
+            self.num_cores = num_cores
         
         # Setup logging
         self._setup_logging()
@@ -83,12 +90,6 @@ class MexicoNetCDFToDGGSConverterAggregated:
     
     def _setup_logging(self):
         """Setup logging to both console and file."""
-        # Check if logging is already configured to prevent multiple log files
-        if logging.getLogger().handlers:
-            # Logging already configured, just get the logger
-            self.logger = logging.getLogger(__name__)
-            return
-        
         # Create log folder if it doesn't exist
         log_folder = "log"
         os.makedirs(log_folder, exist_ok=True)
@@ -98,17 +99,29 @@ class MexicoNetCDFToDGGSConverterAggregated:
         log_filename = f"mexico_netcdf_to_dggs_conversion_{timestamp}.log"
         log_path = os.path.join(log_folder, log_filename)
         
-        # Setup logging configuration
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_path),
-                logging.StreamHandler()
-            ]
-        )
+        # Create a new logger specifically for this script
+        self.logger = logging.getLogger(f"mexico_converter_{timestamp}")
+        self.logger.setLevel(logging.INFO)
         
-        self.logger = logging.getLogger(__name__)
+        # Clear any existing handlers to avoid conflicts
+        self.logger.handlers.clear()
+        
+        # Create formatter
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        
+        # Add file handler
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+        
+        # Add console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+        
+        # Prevent propagation to root logger to avoid duplicate messages
+        self.logger.propagate = False
+        
         self.log_path = log_path
         self.log_message(f"Logging initialized. Log file: {log_path}")
     
@@ -153,6 +166,7 @@ class MexicoNetCDFToDGGSConverterAggregated:
     def aggregate_variables_by_ipcc_code(self, nc_data):
         """
         Aggregate variables with the same IPCC2006 code at the xarray level.
+        New policy: skip variables not in lookup table and report them.
         
         Args:
             nc_data (xarray.Dataset): NetCDF dataset
@@ -168,6 +182,7 @@ class MexicoNetCDFToDGGSConverterAggregated:
         
         # Map variables to IPCC2006 codes
         ipcc_groups = {}
+        unmapped_variables = []
         for var in variables:
             if var in self.variable_to_ipcc:
                 ipcc_code = self.variable_to_ipcc[var]
@@ -175,7 +190,13 @@ class MexicoNetCDFToDGGSConverterAggregated:
                     ipcc_groups[ipcc_code] = []
                 ipcc_groups[ipcc_code].append(var)
             else:
-                self.log_message(f"  Warning: No IPCC mapping found for variable: {var}")
+                unmapped_variables.append(var)
+                self.log_message(f"  Skipping variable '{var}' - not found in IPCC lookup table")
+        
+        if unmapped_variables:
+            self.log_message(f"  Skipped {len(unmapped_variables)} variables not found in IPCC lookup table:")
+            for var in unmapped_variables:
+                self.log_message(f"    {var}")
         
         self.log_message(f"  Found {len(ipcc_groups)} unique IPCC2006 codes:")
         for ipcc_code, vars_list in ipcc_groups.items():
@@ -458,8 +479,8 @@ class MexicoNetCDFToDGGSConverterAggregated:
         """
         self.log_message(f"    Processing {len(ipcc_codes)} aggregated IPCC2006 codes in parallel using raster-first approach...")
         
-        # Determine number of processes to use
-        num_processes = min(len(ipcc_codes), multiprocessing.cpu_count(), 8)
+        # Determine number of processes to use - use self.num_cores
+        num_processes = min(len(ipcc_codes), self.num_cores)
         self.log_message(f"    Using {num_processes} parallel processes")
         
         # Create partial function with fixed arguments
@@ -618,11 +639,11 @@ def main():
     """
     Main function to run the Mexico aggregated NetCDF to DGGS conversion.
     """
-    # Configuration
-    netcdf_folder = "E:/UCalgary_postdoc/data_source/GridInventory/2015_Mexico_Anthropogenic_Methane_Emissions"
+    # Configuration - Updated paths for HPC
+    netcdf_folder = "/home/mingke.li/GridInventory/2015_Mexico_Anthropogenic_Methane_Emissions"
     geojson_path = "data/geojson/global_countries_dggs_merge/México_MEX_grid.geojson"
     output_folder = "output"
-    area_file_path = "E:/UCalgary_postdoc/data_source/GridInventory/2018_Canada_Anthropogenic_Methane_Emissions/can_emis_coal_2018.nc"
+    area_file_path = "/home/mingke.li/GridInventory/2018_Canada_Anthropogenic_Methane_Emissions/can_emis_coal_2018.nc"
     
     # Check if paths exist
     if not os.path.exists(netcdf_folder):
@@ -637,7 +658,7 @@ def main():
         print(f"Error: Area file not found: {area_file_path}")
         return
     
-    # Create converter
+    # Create converter with HPC configuration
     converter = MexicoNetCDFToDGGSConverterAggregated(netcdf_folder, geojson_path, output_folder, area_file_path)
     
     # Process all NetCDF files and combine into single CSV
