@@ -3,9 +3,9 @@ Script to merge offshore and onshore geospatial data by combining features from
 offshore geojson files into corresponding country geojson files.
 
 This script:
-1. Reads offshore geojson files from global_offshore_dggs/
-2. Reads country geojson files from global_countries_dggs/
-3. Matches files by country GID (country abbreviation)
+1. Reads offshore geojson files from global_offshore_grid/
+2. Reads country geojson files from global_countries_grid/
+3. Matches files by country GID (country abbreviation) using consistent naming pattern
 4. Merges features from offshore files into country files
 5. Prevents duplicate features
 6. Maintains data consistency and naming conventions
@@ -61,39 +61,75 @@ class GeojsonMerger:
         # Remove file extension
         name_without_ext = filename.replace('.geojson', '')
         
-        # For offshore files, look for GID that appears after an underscore
-        # This helps distinguish between country names and GIDs
-        if '_' in name_without_ext:
-            parts = name_without_ext.split('_')
-            for part in parts:
-                if len(part) == 3 and part.isupper() and part.isalpha():
-                    # Check if this part looks like a country GID
-                    # Most country GIDs are not common words
-                    if part not in ['THE', 'AND', 'FOR', 'ARE', 'USA', 'UK']:
-                        return part
+        # Pattern: CountryName_GID_grid.geojson or CountryName_GID_offshore_grid.geojson
+        # GID is always before '_grid' or '_offshore_grid'
+        # Also handles disputed territories: TerritoryName_Z##_grid.geojson
         
-        # Fallback: look for 3-letter country codes (GIDs) using regex
-        # Common country GIDs are 3 uppercase letters
+        # Check for offshore pattern first: CountryName_GID_offshore_grid
+        if name_without_ext.endswith('_offshore_grid'):
+            # Extract everything before '_offshore_grid'
+            prefix = name_without_ext.replace('_offshore_grid', '')
+            # GID should be the last part after splitting by '_'
+            parts = prefix.split('_')
+            if len(parts) >= 2:
+                gid = parts[-1]  # Last part should be the GID
+                # Check for standard 3-letter country codes
+                if len(gid) == 3 and gid.isupper() and gid.isalpha():
+                    return gid
+                # Check for zone codes like Z01, Z02, etc.
+                elif gid.startswith('Z') and len(gid) == 3 and gid[1:].isdigit():
+                    return gid
+        
+        # Check for regular grid pattern: CountryName_GID_grid
+        elif name_without_ext.endswith('_grid'):
+            # Extract everything before '_grid'
+            prefix = name_without_ext.replace('_grid', '')
+            # GID should be the last part after splitting by '_'
+            parts = prefix.split('_')
+            if len(parts) >= 2:
+                gid = parts[-1]  # Last part should be the GID
+                # Check for standard 3-letter country codes
+                if len(gid) == 3 and gid.isupper() and gid.isalpha():
+                    return gid
+                # Check for zone codes like Z01, Z02, etc.
+                elif gid.startswith('Z') and len(gid) == 3 and gid[1:].isdigit():
+                    return gid
+        
+        # Fallback: try to find any 3-character code in the filename
+        # This handles cases where the pattern might be slightly different
+        import re
+        # Look for 3-letter uppercase codes (standard countries)
         gid_pattern = r'[A-Z]{3}'
         matches = re.findall(gid_pattern, name_without_ext)
         
         if matches:
-            # If multiple matches, try to find the most likely GID
-            if len(matches) > 1:
-                # Look for a GID that's surrounded by underscores or at boundaries
-                for match in matches:
-                    # Check if this 3-letter code is surrounded by underscores
-                    if f'_{match}_' in name_without_ext:
-                        return match
-                    # Check if it's at the beginning or end with underscore
-                    if name_without_ext.startswith(f'{match}_') or name_without_ext.endswith(f'_{match}'):
-                        return match
-                    # Check if it's followed by 'offshore' or 'grid' (common patterns)
-                    if f'_{match}_offshore' in name_without_ext or f'_{match}_grid' in name_without_ext:
-                        return match
+            # Look for a GID that appears to be in the right position
+            for match in matches:
+                # Check if it's followed by 'grid' or 'offshore'
+                if f'_{match}_grid' in name_without_ext or f'_{match}_offshore' in name_without_ext:
+                    return match
+                # Check if it's at the end before 'grid'
+                if name_without_ext.endswith(f'_{match}_grid'):
+                    return match
+                # Check if it's at the end before 'offshore_grid'
+                if name_without_ext.endswith(f'_{match}_offshore_grid'):
+                    return match
             
-            # Return the first match if no better option found
-            return matches[0]
+            # If no pattern match, return the last 3-letter code found
+            return matches[-1]
+        
+        # Additional fallback: look for zone codes (Z##)
+        zone_pattern = r'Z\d{2}'
+        zone_matches = re.findall(zone_pattern, name_without_ext)
+        if zone_matches:
+            # Look for zone code in the right position
+            for match in zone_matches:
+                if f'_{match}_grid' in name_without_ext:
+                    return match
+                if name_without_ext.endswith(f'_{match}_grid'):
+                    return match
+            # Return the last zone code found
+            return zone_matches[-1]
         
         return None
     
@@ -106,14 +142,27 @@ class GeojsonMerger:
         """
         logger.info("Building country files index...")
         index = {}
+        skipped_files = []
         
-        for file_path in self.countries_dir.glob('*.geojson'):
+        all_files = list(self.countries_dir.glob('*.geojson'))
+        logger.info(f"Found {len(all_files)} total country files")
+        
+        for file_path in all_files:
             gid = self.extract_gid_from_filename(file_path.name)
             if gid:
                 index[gid] = file_path.name
                 logger.debug(f"Mapped GID {gid} to file {file_path.name}")
+            else:
+                skipped_files.append(file_path.name)
         
         logger.info(f"Indexed {len(index)} country files")
+        if skipped_files:
+            logger.warning(f"Skipped {len(skipped_files)} files (could not extract GID):")
+            for filename in skipped_files[:10]:  # Show first 10 skipped files
+                logger.warning(f"  {filename}")
+            if len(skipped_files) > 10:
+                logger.warning(f"  ... and {len(skipped_files) - 10} more")
+        
         return index
     
     def load_geojson_file(self, file_path: Path) -> Dict:
@@ -181,14 +230,21 @@ class GeojsonMerger:
         
         # Add offshore features that don't have duplicate zoneIDs
         added_count = 0
+        duplicate_count = 0
+        no_zoneid_count = 0
+        
         for feature in offshore_features:
             zone_id = feature.get('properties', {}).get('zoneID')
-            if zone_id and zone_id not in existing_zone_ids:
+            if not zone_id:
+                no_zoneid_count += 1
+            elif zone_id in existing_zone_ids:
+                duplicate_count += 1
+            else:
                 merged_features.append(feature)
                 existing_zone_ids.add(zone_id)
                 added_count += 1
         
-        logger.info(f"Added {added_count} offshore features")
+        logger.info(f"Offshore features: {len(offshore_features)} total, {added_count} added, {duplicate_count} duplicates, {no_zoneid_count} no zoneID")
         
         # Update the merged data
         merged_data = country_data.copy()
@@ -313,8 +369,8 @@ class GeojsonMerger:
 def main():
     """Main function to run the geojson merger."""
     # Set paths - modify these as needed
-    offshore_dir = 'data/geojson/global_offshore_dggs'
-    countries_dir = 'data/geojson/global_countries_dggs'
+    offshore_dir = 'data/geojson/global_offshore_grid'
+    countries_dir = 'data/geojson/global_countries_grid'
     output_dir = 'data/geojson/global_countries_dggs_merge'
     
     # Enable verbose logging if needed

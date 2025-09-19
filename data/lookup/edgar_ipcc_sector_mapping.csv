@@ -1,4 +1,4 @@
-EDGAR Sector,Description,IPCC 1996 codes,IPCC 2006 codes
+EDGAR Sector,Description,IPCC1996,IPCC2006
 AGS,Agricultural soils,4C+4D1+4D2+4D4,3C2+3C3+3C4+3C7
 AWB,Agricultural waste burning,4F,3C1b
 CHE,Chemical processes,2B,2B

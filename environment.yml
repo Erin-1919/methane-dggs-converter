@@ -37,3 +37,7 @@ dependencies:
   - matplotlib
   - seaborn
   
+  # Pip dependencies
+  - pip
+  - pip:
+    - dggal

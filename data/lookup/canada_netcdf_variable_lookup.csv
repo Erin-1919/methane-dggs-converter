@@ -74,9 +74,3 @@ variable,IPCC2006,CRT
 5A2 (unmanaged solid waste),4A2,5A2
 5BC (biological treatment and incineration),4B,5B+5C
 5D wastewater (total),4D,5D
-coal (total),1B1,1B1
-livestock (total),3A,3A+3B
-oil gas combustion (total),1A1b+1A1c+1A3b,1A1b+1A1c+1A3b
-oil gas leakage (total),1B2aiii+1B2biii,1B2a+1B2b
-oil gas vent flare (total),1B2ai+1B2bi+1B2aii+1B2bii,1B2c
-solid waste (total),4A+4B,5A+5B+5C
