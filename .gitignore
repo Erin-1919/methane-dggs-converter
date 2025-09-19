@@ -59,6 +59,7 @@ log/
 # Output files
 output/
 *.csv
+!data/lookup/*.csv
 *.geojson
 
 # Temporary files
