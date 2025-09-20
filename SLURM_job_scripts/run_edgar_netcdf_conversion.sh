@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=edgar_netcdf_conversion
-#SBATCH --output=log/edgar_netcdf_conversion.out
-#SBATCH --error=log/edgar_netcdf_conversion.err
+#SBATCH --output=log/edgar_netcdf_conversion_%j.out
+#SBATCH --error=log/edgar_netcdf_conversion_%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24

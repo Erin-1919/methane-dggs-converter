@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mexico_netcdf_conversion
-#SBATCH --output=log/mexico_netcdf_conversion.out
-#SBATCH --error=log/mexico_netcdf_conversion.err
+#SBATCH --output=log/mexico_netcdf_conversion_%j.out
+#SBATCH --error=log/mexico_netcdf_conversion_%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24

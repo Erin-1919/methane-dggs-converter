@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=us_netcdf_conversion
-#SBATCH --output=log/us_netcdf_conversion_%j.out
-#SBATCH --error=log/us_netcdf_conversion_%j.err
+#SBATCH --job-name=combine_geojson
+#SBATCH --output=log/combine_geojson_%j.out
+#SBATCH --error=log/combine_geojson_%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=24
-#SBATCH --time=5:00:0
-#SBATCH --mem=24G
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:00:00
+#SBATCH --mem=64G
 #SBATCH --partition=cpu2019
 #SBATCH --mail-user=mingke.li@ucalgary.ca
 #SBATCH --mail-type=END,FAIL
@@ -25,30 +25,29 @@ conda activate netcdf_dggs_converter
 # Set Python path and environment variables
 export PYTHON_PATH="/home/mingke.li/miniconda3/envs/netcdf_dggs_converter/bin/python"
 export OMP_NUM_THREADS=1  # Prevent OpenMP from using all cores
-export NUM_CORES=24       # Match the number of CPUs requested
 
 # Create log directory
 mkdir -p log
 
-echo "Starting US NetCDF to DGGS conversion process..."
-echo "Using $NUM_CORES CPU cores for parallel processing"
+echo "Starting GeoJSON combination process..."
+echo "Using 1 CPU core with 64GB memory"
 
-# Run US NetCDF to DGGS conversion
+# Run GeoJSON combination script
 echo "=========================================="
-echo "Running US NetCDF to DGGS conversion"
+echo "Running combine_geojson_folder.py"
 echo "=========================================="
 echo "Start time: $(date)"
-$PYTHON_PATH scripts/netcdf_conversion/us_netcdf_to_dggs_converter.py
+$PYTHON_PATH scripts/utilities/combine_geojson_folder.py
 EXIT_CODE=$?
 echo "End time: $(date)"
 
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "US NetCDF conversion completed successfully"
+    echo "GeoJSON combination completed successfully"
 else
-    echo "US NetCDF conversion failed with exit code $EXIT_CODE"
+    echo "GeoJSON combination failed with exit code $EXIT_CODE"
     exit 1
 fi
 
 echo ""
-echo "US NetCDF to DGGS conversion completed successfully!"
+echo "GeoJSON combination completed successfully!"
 echo "Job finished at:" $(date)
