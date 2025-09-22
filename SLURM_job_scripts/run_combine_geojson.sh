@@ -52,3 +52,4 @@ fi
 echo ""
 echo "GeoJSON combination completed successfully!"
 echo "Job finished at:" $(date)
+
