@@ -62,6 +62,9 @@ output/
 !data/lookup/*.csv
 *.geojson
 
+# Local test scripts (do not sync)
+scripts/test_scripts/
+
 # Temporary files
 *.tmp
 *.temp
