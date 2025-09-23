@@ -212,6 +212,23 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
     - Single global pool with dynamic pixel-chunk tasks across countries
     - Per-process country grid + spatial index cache to reduce I/O and sindex rebuilds
     - Preserves numerical logic and output format
+    
+    GFEI-specific features:
+    - Handles emission rate units (Mg km⁻² a⁻¹)
+    - Uses pixel area from dataset when available (m²)
+    - Extracts year from filename or time variable
+    - Converts to Mg/year (Megagrams per year)
+    - Processes global data for multiple years
+    - Uses GFEI variable to IPCC2006 mapping
+    
+    Unit Conversion:
+    Input: emission_rate (Mg km⁻² a⁻¹) × area (m²)
+    Output: mass (Mg/year)
+    
+    Formula:
+    1) Convert emission_rate to Mg m⁻² a⁻¹: emission_rate_Mg_km2_a1 × 1e-6
+    2) mass_Mg = (emission_rate_Mg_m2_a1) × area_m2
+    Where: 1 km² = 1,000,000 m² (1e6)
     """
 
     def __init__(self, year_to_folder, geojson_folder, output_folder, max_processes=None, chunk_size_pixels=20000):

@@ -15,9 +15,25 @@ from datetime import datetime
 
 class CanadaNetCDFToDGGSConverterAggregated:
     """
-    Convert NetCDF files to DGGS grid values using aggregated raster-first processing.
+    Convert Canada NetCDF files to DGGS grid values using aggregated raster-first processing.
     This version aggregates variables by IPCC2006 codes using a lookup table,
     making the process more standardized and efficient.
+    
+    Canada-specific features:
+    - Handles emission rate units (Mg km⁻² a⁻¹)
+    - Uses pixel area from dataset when available (m²)
+    - Extracts year from filename or time variable
+    - Converts to Mg/year (Megagrams per year)
+    - Processes multiple files for different years
+    
+    Unit Conversion:
+    Input: emission_rate (Mg km⁻² a⁻¹) × area (m²)
+    Output: mass (Mg/year)
+    
+    Formula:
+    1) Convert emission_rate to Mg m⁻² a⁻¹: emission_rate_Mg_km2_a1 × 1e-6
+    2) mass_Mg = (emission_rate_Mg_m2_a1) × area_m2
+    Where: 1 km² = 1,000,000 m² (1e6)
     """
     
     def __init__(self, netcdf_folder, geojson_path, output_folder, num_cores=None):

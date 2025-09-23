@@ -223,6 +223,21 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
     """
     Optimized EDGAR NetCDF -> DGGS converter with dynamic pixel-chunk parallelism.
     Preserves original output structure and resume behavior.
+    
+    EDGAR-specific features:
+    - Handles emission units (ton/year)
+    - No unit conversion needed (ton/year = Mg/year)
+    - Extracts year from filename or time variable
+    - Outputs in Mg/year (Megagrams per year)
+    - Processes global data for multiple years (1970-2022)
+    - Uses EDGAR sector to IPCC2006 mapping
+    
+    Unit Conversion:
+    Input: emissions (ton/year)
+    Output: mass (Mg/year)
+    
+    Formula: mass_Mg = emissions_ton_year
+    Where: 1 ton = 1 Mg (no conversion needed)
     """
 
     def __init__(self, edgar_folder, geojson_folder, output_folder, start_year=1970, end_year=2022, max_processes=None, chunk_size_pixels=20000):
