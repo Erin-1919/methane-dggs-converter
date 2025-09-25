@@ -196,17 +196,17 @@ class ChinaTIFFToDGGSConverter:
         values = mass_per_pixel.ravel()
         sums = np.bincount(labels, weights=values, minlength=self.num_cells + 1)[1:]
 
-        total_raster_value = float(np.sum(mass_per_pixel))
+        # Use flattened arrays consistently when masking by labels
+        total_raster_value = float(np.sum(values[labels > 0]))
         total_weighted_value = float(np.sum(sums))
-        if total_weighted_value != 0.0:
+
+        # Scale per variable to match intersecting pixel total
+        if total_weighted_value > 0.0 and total_raster_value > 0.0:
             scaling_factor = total_raster_value / total_weighted_value
             sums = sums * scaling_factor
-            total_weighted_after = float(np.sum(sums))
-        else:
-            scaling_factor = 1.0
-            total_weighted_after = 0.0
+            self.log_message(f"      Applied scaling factor for {ipcc_code}: {scaling_factor:.6f}")
 
-        return ipcc_code, sums, total_raster_value, total_weighted_after, scaling_factor
+        return ipcc_code, sums, total_raster_value, float(np.sum(sums))
 
     def _list_variable_dirs(self):
         all_entries = [os.path.join(self.root_folder, d) for d in os.listdir(self.root_folder)]
@@ -278,11 +278,10 @@ class ChinaTIFFToDGGSConverter:
 
             # Aggregate by IPCC code (some variables may share code)
             aggregates = {}
-            for ipcc_code, sums, total_raster_value, total_weighted_after, scaling_factor in results:
-                # Log scaling info per raster/IPCC
-                self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
-                self.log_message(f"      Total raster value: {total_raster_value:.6f}")
-                self.log_message(f"      Total weighted value (after scaling): {total_weighted_after:.6f}")
+            for ipcc_code, sums, total_raster_value, total_weighted_after in results:
+                # Log per-raster totals (no scaling applied at this stage)
+                self.log_message(f"      Raster total (Mg/yr): {total_raster_value:.6f}")
+                self.log_message(f"      DGGS weighted sum (Mg/yr): {total_weighted_after:.6f}")
                 if ipcc_code not in aggregates:
                     aggregates[ipcc_code] = sums
                 else:
@@ -291,8 +290,24 @@ class ChinaTIFFToDGGSConverter:
             for ipcc_code, vector in aggregates.items():
                 result_df[ipcc_code] = vector
 
+            # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
             value_cols = [c for c in result_df.columns if c != 'dggsID']
+            self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+            small_values_before = 0
+            for col in value_cols:
+                small_mask = result_df[col] < 1e-6
+                small_count = small_mask.sum()
+                small_values_before += small_count
+                result_df[col] = result_df[col].where(result_df[col] >= 1e-6, 0.0)
+            self.log_message(f"    Set {small_values_before} small values to zero across all columns")
+            
+            # Step 2: Remove rows where all values are 0
+            rows_before = len(result_df)
             result_df = result_df[~(result_df[value_cols] == 0).all(axis=1)]
+            rows_after = len(result_df)
+            self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+            
+            # Steps complete (only Step 1 and Step 2 retained by design)
             result_df['Year'] = year
 
             out_dir = "test/test_china_csv"
@@ -322,7 +337,31 @@ class ChinaTIFFToDGGSConverter:
 
         combined_iter = (pd.read_csv(p) for p in sorted(yearly_files))
         combined_df = pd.concat(combined_iter, ignore_index=True)
-        combined_df = combined_df[~(combined_df[[c for c in combined_df.columns if c not in ['dggsID', 'Year']]] == 0).all(axis=1)]
+        
+        # Get value columns for processing
+        value_cols = [c for c in combined_df.columns if c not in ['dggsID', 'Year']]
+        # Compute per-variable original totals before filtering for scaling
+        original_totals = {}
+        for col in value_cols:
+            original_totals[col] = combined_df[col].sum()
+        
+        # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
+        self.log_message(f"Final processing - Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+        small_values_before = 0
+        for col in value_cols:
+            small_mask = combined_df[col] < 1e-6
+            small_count = small_mask.sum()
+            small_values_before += small_count
+            combined_df[col] = combined_df[col].where(combined_df[col] >= 1e-6, 0.0)
+        self.log_message(f"  Set {small_values_before} small values to zero across all columns")
+        
+        # Step 2: Remove rows where all values are 0
+        rows_before = len(combined_df)
+        combined_df = combined_df[~(combined_df[value_cols] == 0).all(axis=1)]
+        rows_after = len(combined_df)
+        self.log_message(f"Final processing - Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+        
+        # Steps complete (only Step 1 and Step 2 retained by design)
 
         output_path = os.path.join(self.output_folder, "China_DGGS_methane_emissions_ALL_FILES.csv")
         combined_df.to_csv(output_path, index=False)

@@ -553,6 +553,7 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
         # Process each non-zero pixel
         start_time = time.time()
         processed_pixels = 0
+        distributed_raster_total = 0.0
         
         for i in range(num_non_zero):
             row, col = non_zero_coords[0][i], non_zero_coords[1][i]
@@ -602,11 +603,13 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
                         area_ratio = intersection_areas[j] / total_intersection_area
                         weighted_value = pixel_value * area_ratio
                         results[cell_idx] += weighted_value
+                    distributed_raster_total += float(pixel_value)
                 else:
                     # Fallback: if no valid intersection area, distribute equally
                     value_per_cell = pixel_value / len(intersecting_cells)
                     for cell_idx in intersecting_cells:
                         results[cell_idx] += value_per_cell
+                    distributed_raster_total += float(pixel_value)
             
             processed_pixels += 1
             
@@ -623,16 +626,17 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
         self.log_message(f"      Completed processing {num_non_zero} pixels in {total_time:.2f} seconds")
         self.log_message(f"      Average: {total_time/num_non_zero*1000:.2f} ms per pixel")
         
-        # Apply scaling factor to match total raster value
-        total_raster_value = np.sum(raster_data['data'])
-        total_weighted_value = np.sum(results)
-        if total_weighted_value != 0:
+        # Scale to match total of intersecting pixels (per variable)
+        total_raster_value = float(distributed_raster_total)
+        total_weighted_value = float(np.sum(results))
+        if total_weighted_value > 0.0 and total_raster_value > 0.0:
             scaling_factor = total_raster_value / total_weighted_value
             results = results * scaling_factor
             self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
-            self.log_message(f"      Total raster value: {total_raster_value:.6f}")
-            self.log_message(f"      Total weighted value (after scaling): {np.sum(results):.6f}")
-        
+            self.log_message(f"      Raster total (intersecting pixels): {total_raster_value:.6f} | DGGS total (after scaling): {float(np.sum(results)):.6f}")
+        else:
+            self.log_message("      Skipped scaling (zero total encountered)")
+
         return results.tolist()
     
     def _find_intersecting_cells(self, pixel_geom):
@@ -733,15 +737,29 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
                     f"      Processed {processed_idx}/{total_codes} IPCC codes ({processed_idx/total_codes*100:.1f}%)"
                 )
             
-            # Remove rows where all values are 0 (except dggsID)
+            # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
             value_columns = [col for col in result_df.columns if col != 'dggsID']
+            self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+            small_values_before = 0
+            for col in value_columns:
+                small_mask = result_df[col] < 1e-6
+                small_count = small_mask.sum()
+                small_values_before += small_count
+                result_df[col] = result_df[col].where(result_df[col] >= 1e-6, 0.0)
+            self.log_message(f"    Set {small_values_before} small values to zero across all columns")
+            
+            # Step 2: Remove rows where all values are 0 (except dggsID)
+            rows_before = len(result_df)
             result_df = result_df[~(result_df[value_columns] == 0).all(axis=1)]
+            rows_after = len(result_df)
+            self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+
             
             # Add Year column
             result_df['Year'] = year
             
             # Save to CSV
-            output_filename = f"CHINA_SACMS_DGGS_methane_emissions_{year}.csv"
+            output_filename = f"China_SACMS_DGGS_methane_emissions_{year}.csv"
             output_path = os.path.join(self.output_folder, output_filename)
             
             result_df.to_csv(output_path, index=False)

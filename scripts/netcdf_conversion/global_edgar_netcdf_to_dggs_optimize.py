@@ -5,6 +5,7 @@ import logging
 import multiprocessing
 from datetime import datetime
 from collections import defaultdict
+from typing import List, Optional, Set
 
 import numpy as np
 import pandas as pd
@@ -217,6 +218,131 @@ def _pixel_chunk_worker(args):
         return gid, idx_array, val_array, chunk_target_sum, ipcc_code, year, sector_folder
     except Exception:
         return gid, np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float64), 0.0, ipcc_code, year, sector_folder
+
+
+def aggregate_aviation_columns_wide(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
+    """Aggregate aviation columns into a single '1A3a' column if they exist, then drop originals."""
+    aviation_cols = ['1A3a_CDS', '1A3a_CRS', '1A3a_LTO', '1A3a_SPS']
+    present = [c for c in aviation_cols if c in df.columns]
+    if not present:
+        return df
+    logger.info(f"  Aggregating aviation columns into 1A3a: {present}")
+    df['1A3a'] = df.get('1A3a', 0.0) + df[present].sum(axis=1)
+    df = df.drop(columns=present)
+    return df
+
+
+def melt_and_accumulate(long_accumulator: Optional[pd.DataFrame], df: pd.DataFrame, year: int) -> pd.DataFrame:
+    """Melt sector-wide dataframe to long format and accumulate sums by keys."""
+    id_cols = ['dggsID', 'GID']
+    # Ensure required identifiers exist
+    for c in id_cols:
+        if c not in df.columns:
+            raise ValueError(f"Missing required column '{c}' in sector-year dataframe")
+    df['Year'] = year
+    value_cols = [c for c in df.columns if c not in (id_cols + ['Year'])]
+    if not value_cols:
+        return long_accumulator if long_accumulator is not None else pd.DataFrame(columns=id_cols + ['Year', 'IPCC', 'value'])
+    melted = df.melt(id_vars=id_cols + ['Year'], value_vars=value_cols, var_name='IPCC', value_name='value')
+    melted['value'] = melted['value'].fillna(0.0)
+    # Early filter zeros to reduce memory
+    melted = melted[melted['value'] > 0]
+    if long_accumulator is None or long_accumulator.empty:
+        return melted
+    # Concatenate and periodically reduce by grouping
+    combined = pd.concat([long_accumulator, melted], ignore_index=True)
+    combined = combined.groupby(['dggsID', 'GID', 'Year', 'IPCC'], as_index=False)['value'].sum()
+    return combined
+
+
+def process_year_efficiently(test_csv_folder: str, sector_folders: List[str], year: int, logger: logging.Logger) -> Optional[pd.DataFrame]:
+    """Process all sectors for a single year efficiently."""
+    logger.info(f"Processing year {year}")
+    long_acc: Optional[pd.DataFrame] = None
+    files_found = 0
+    for sector in sector_folders:
+        sector_path = os.path.join(test_csv_folder, sector)
+        fname = f"EDGAR_DGGS_methane_emissions_{sector}_{year}.csv"
+        fpath = os.path.join(sector_path, fname)
+        if not os.path.exists(fpath):
+            continue
+        try:
+            df = pd.read_csv(fpath)
+        except Exception as e:
+            logger.error(f"  Error reading {fpath}: {e}")
+            continue
+        if df.empty:
+            continue
+        files_found += 1
+        long_acc = melt_and_accumulate(long_acc, df, year)
+        logger.info(f"  Added {sector} ({len(df)} rows)")
+
+    if long_acc is None or long_acc.empty:
+        logger.warning(f"No data found for year {year}")
+        return None
+
+    # Aggregate aviation categories in long form by mapping to 1A3a
+    aviation_map = {
+        '1A3a_CDS': '1A3a',
+        '1A3a_CRS': '1A3a',
+        '1A3a_LTO': '1A3a',
+        '1A3a_SPS': '1A3a',
+    }
+    long_acc['IPCC'] = long_acc['IPCC'].map(lambda c: aviation_map.get(c, c))
+    long_acc = long_acc.groupby(['dggsID', 'GID', 'Year', 'IPCC'], as_index=False)['value'].sum()
+
+    # Pivot to wide per-year
+    id_cols = ['dggsID', 'GID', 'Year']
+    wide = long_acc.pivot_table(index=id_cols, columns='IPCC', values='value', aggfunc='sum', fill_value=0.0)
+    wide = wide.reset_index()
+    # Ensure aviation aggregation complete and originals dropped (mapping already handled)
+    wide = aggregate_aviation_columns_wide(wide, logger)
+    logger.info(f"  Year {year} wide shape: {wide.shape}")
+    return wide
+
+
+def collect_all_ipcc_columns(per_year_paths: List[str], logger: logging.Logger) -> List[str]:
+    """Scan per-year CSV files to build a stable ordered list of IPCC columns."""
+    ipcc_set: Set[str] = set()
+    for p in per_year_paths:
+        try:
+            cols = list(pd.read_csv(p, nrows=0).columns)
+        except Exception as e:
+            logger.error(f"  Error reading header from {p}: {e}")
+            continue
+        for c in cols:
+            if c not in ('dggsID', 'GID', 'Year'):
+                ipcc_set.add(c)
+    ordered = sorted(ipcc_set)
+    logger.info(f"Collected {len(ordered)} IPCC columns across years")
+    return ordered
+
+
+def write_final_all_years(per_year_paths: List[str], output_path: str, ipcc_columns: List[str], logger: logging.Logger) -> None:
+    """Append per-year CSVs into a single final CSV with consistent column order."""
+    id_cols = ['dggsID', 'GID', 'Year']
+    full_cols = id_cols + ipcc_columns
+    header_written = False
+    # Ensure output directory
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    # Remove existing final file if present to avoid appending to old content
+    if os.path.exists(output_path):
+        os.remove(output_path)
+    for p in per_year_paths:
+        try:
+            df = pd.read_csv(p)
+        except Exception as e:
+            logger.error(f"  Error reading {p}: {e}")
+            continue
+        # Add any missing IPCC columns with 0.0
+        for c in ipcc_columns:
+            if c not in df.columns:
+                df[c] = 0.0
+        # Keep only required columns (drop any unexpected)
+        df = df[full_cols]
+        df.to_csv(output_path, mode='a', index=False, header=(not header_written))
+        header_written = True
+        logger.info(f"  Appended {p} -> {output_path} ({len(df)} rows)")
 
 
 class GlobalEDGARNetCDFToDGGSConverterOptimized:
@@ -495,6 +621,7 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
                     results[idx] = results[idx] + val
             total = float(np.sum(results))
             target_sum = float(aggregate_targets[gid])
+            # Per-country scaling: compare DGGS vs intersected raster target
             if total > 0.0 and target_sum > 0.0:
                 scale = target_sum / total
                 results = results * scale
@@ -503,6 +630,8 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
             df['GID'] = gid
             df[ipcc_code] = results
             df['Year'] = year
+            # Single small-value pass at end: threshold < 1e-6 to zero, then drop zeros
+            df.loc[(df[ipcc_code] > 0) & (df[ipcc_code] < 1e-6), ipcc_code] = 0.0
             df = df[df[ipcc_code] > 0]
             if len(df) > 0:
                 path = self._save_country_df(df, sector_folder, gid, year)
@@ -577,48 +706,68 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
     def process_all_sectors(self):
         start_time = time.time()
         self.log_message(f"Processing all {len(self.sector_folders)} sectors...")
-        all_sector_results = []
         successful_sectors = []
+        
+        # Process each sector individually to avoid memory issues
         for sector_folder in self.sector_folders:
             self.log_message(f"  Processing sector: {sector_folder}")
             try:
                 result = self.process_sector(sector_folder)
                 if result is not None and len(result) > 0:
-                    all_sector_results.append(result)
                     successful_sectors.append(sector_folder)
                     self.log_message(f"  Sector {sector_folder}: {len(result)} records")
                 else:
                     self.log_message(f"  Sector {sector_folder}: No results")
             except Exception as e:
                 self.log_message(f"  Error processing sector {sector_folder}: {e}")
-        if not all_sector_results:
+        
+        if not successful_sectors:
             self.log_message("No results found for any sector")
             return None
-        combined_df = pd.concat(all_sector_results, ignore_index=True)
-        # Ensure Year column exists and within requested range
-        if 'Year' not in combined_df.columns:
-            self.log_message("Warning: Combined dataframe missing Year column; filling with start_year")
-            combined_df['Year'] = self.start_year
-        combined_df['Year'] = combined_df['Year'].astype(int)
-        combined_df = combined_df[(combined_df['Year'] >= self.start_year) & (combined_df['Year'] <= self.end_year)]
-
-        # Combine to wide-by-IPCC, long-by-Year with no duplicates
-        id_cols = ['dggsID', 'GID', 'Year']
-        value_columns = [c for c in combined_df.columns if c not in id_cols]
-        long_df = combined_df.melt(id_vars=id_cols, value_vars=value_columns, var_name='IPCC', value_name='value')
-        long_df['value'] = long_df['value'].fillna(0.0)
-        long_df = long_df.groupby(id_cols + ['IPCC'], as_index=False)['value'].sum()
-        long_df = long_df[long_df['value'] > 0]
-        wide_df = long_df.pivot_table(index=id_cols, columns='IPCC', values='value', aggfunc='sum', fill_value=0.0)
-        wide_df = wide_df.reset_index()
-        ipcc_cols = sorted([c for c in wide_df.columns if c not in id_cols])
-        wide_df = wide_df[id_cols + ipcc_cols]
-
+        
+        # Now efficiently combine all intermediate files year by year
+        self.log_message(f"\nCombining intermediate files efficiently...")
+        test_csv_folder = os.path.join(os.getcwd(), "test", "test_EDGAR_csv")
+        
+        # Ensure subfolder for per-year EDGAR outputs
+        edgar_years_folder = os.path.join(self.output_folder, "EDGAR")
+        os.makedirs(edgar_years_folder, exist_ok=True)
+        
+        per_year_paths: List[str] = []
+        successful_years: List[int] = []
+        failed_years: List[int] = []
+        
+        for year in range(self.start_year, self.end_year + 1):
+            wide = process_year_efficiently(test_csv_folder, self.sector_folders, year, self.logger)
+            if wide is None or wide.empty:
+                failed_years.append(year)
+                continue
+            
+            # Stable column order per-year: id cols then sorted IPCC
+            id_cols = ['dggsID', 'GID', 'Year']
+            ipcc_cols_sorted = sorted([c for c in wide.columns if c not in id_cols])
+            wide = wide[id_cols + ipcc_cols_sorted]
+            
+            per_year_output = os.path.join(edgar_years_folder, f"EDGAR_DGGS_methane_emissions_{year}.csv")
+            try:
+                wide.to_csv(per_year_output, index=False)
+                per_year_paths.append(per_year_output)
+                successful_years.append(year)
+                self.log_message(f"Saved per-year CSV: {per_year_output} ({wide.shape})")
+            except Exception as e:
+                self.log_message(f"Error saving per-year CSV for {year}: {e}")
+                failed_years.append(year)
+        
+        if not per_year_paths:
+            self.log_message("No per-year CSVs produced; cannot build final file.")
+            return None
+        
+        # Build final all-years CSV with consistent columns
+        ipcc_columns = collect_all_ipcc_columns(per_year_paths, self.logger)
         output_filename = f"EDGAR_DGGS_methane_emissions_ALL_SECTORS_{self.start_year}_{self.end_year}.csv"
-        output_path = os.path.join(self.output_folder, output_filename)
-        wide_df.to_csv(output_path, index=False)
-        self.log_message(f"\nFinal results saved to: {output_path}")
-        self.log_message(f"Final output shape: {wide_df.shape}")
+        final_output = os.path.join(self.output_folder, output_filename)
+        write_final_all_years(per_year_paths, final_output, ipcc_columns, self.logger)
+        
         total_time = time.time() - start_time
         self.log_message(f"\n{'='*60}")
         self.log_message("PROCESSING SUMMARY")
@@ -626,14 +775,19 @@ class GlobalEDGARNetCDFToDGGSConverterOptimized:
         self.log_message(f"Year range processed: {self.start_year} to {self.end_year}")
         self.log_message(f"Total sectors processed: {len(successful_sectors)}/{len(self.sector_folders)}")
         self.log_message(f"Successful sectors: {', '.join(successful_sectors)}")
-        self.log_message(f"Total output records: {len(combined_df)}")
+        self.log_message(f"Successful years: {len(successful_years)}")
+        self.log_message(f"Failed years: {len(failed_years)} -> {failed_years}")
+        self.log_message(f"Per-year CSVs: {len(per_year_paths)} saved in {edgar_years_folder}")
+        self.log_message(f"Final combined CSV: {final_output}")
         self.log_message(f"Total processing time: {total_time:.2f} seconds ({total_time/60:.2f} minutes)")
         self.log_message(f"\nResuming capabilities:")
         self.log_message(f"  - Intermediate files saved to: test/test_EDGAR_csv/[sector]/countries/")
+        self.log_message(f"  - Per-year files saved to: {edgar_years_folder}")
         self.log_message(f"  - Script will automatically skip existing files on restart")
+        
         # Cleanup temp
         self._cleanup_temp_files()
-        return output_path
+        return final_output
 
     def _cleanup_temp_files(self):
         self.log_message("Cleaning up temporary files...")

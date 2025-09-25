@@ -179,27 +179,41 @@ class IndAusCSVToDGGSConverter:
         self.log_message("  Aggregating raster to DGGS cells...")
         dggs_values = self._aggregate_to_dggs(data, label_raster)
 
-        # Scaling to preserve totals
-        total_raster_value = float(np.sum(data))
+        # Calculate totals and apply scaling now (single variable)
+        total_raster_value = float(np.sum(data[label_raster > 0]))
         total_weighted_value = float(np.sum(dggs_values))
-        if total_weighted_value != 0.0:
+        if total_weighted_value > 0.0 and total_raster_value > 0.0:
             scaling_factor = total_raster_value / total_weighted_value
             dggs_values = dggs_values * scaling_factor
-            total_weighted_after = float(np.sum(dggs_values))
+            self.log_message(f"  Applied scaling factor: {scaling_factor:.6f}")
+            self.log_message(f"  Raster total (intersecting pixels): {total_raster_value:.6f}")
+            self.log_message(f"  DGGS total (after scaling): {float(np.sum(dggs_values)):.6f}")
         else:
-            scaling_factor = 1.0
-            total_weighted_after = 0.0
-        self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
-        self.log_message(f"      Total raster value: {total_raster_value:.6f}")
-        self.log_message(f"      Total weighted value (after scaling): {total_weighted_after:.6f}")
+            self.log_message("  Skipped scaling (zero total encountered)")
 
         # Build output dataframe
         result_df = dggs_gdf[['zoneID']].copy().rename(columns={'zoneID': 'dggsID'})
         result_df[self.ipcc_code] = dggs_values
         result_df['Year'] = self.year
-        # Remove rows where all values are 0 (except dggsID, Year)
+        
+        # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
         value_cols = [c for c in result_df.columns if c not in ['dggsID', 'Year']]
+        self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+        small_values_before = 0
+        for col in value_cols:
+            small_mask = result_df[col] < 1e-6
+            small_count = small_mask.sum()
+            small_values_before += small_count
+            result_df[col] = result_df[col].where(result_df[col] >= 1e-6, 0.0)
+        self.log_message(f"    Set {small_values_before} small values to zero across all columns")
+        
+        # Step 2: Remove rows where all values are 0 (except dggsID, Year)
+        rows_before = len(result_df)
         result_df = result_df[~(result_df[value_cols] == 0).all(axis=1)]
+        rows_after = len(result_df)
+        self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+        
+        # Steps complete (only Step 1 and Step 2 retained by design)
 
         out_path = os.path.join(self.output_folder, output_name)
         result_df.to_csv(out_path, index=False)

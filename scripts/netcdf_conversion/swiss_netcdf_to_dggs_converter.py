@@ -209,6 +209,7 @@ class SwissNetCDFToDGGSConverterAggregated:
     def calculate_weighted_values_raster_first(self, raster_data, ipcc_code):
         self.log_message(f"    Processing {ipcc_code} using raster-first approach...")
         results = np.zeros(len(self.dggs_grid_proj))
+        distributed_raster_total = 0.0
 
         data = raster_data['data']
         non_zero_mask = data > 0
@@ -263,10 +264,12 @@ class SwissNetCDFToDGGSConverterAggregated:
                     for j, cell_idx in enumerate(intersecting):
                         area_ratio = intersection_areas[j] / total_intersection_area if total_intersection_area > 0 else 0.0
                         results[cell_idx] += pixel_value * area_ratio
+                    distributed_raster_total += float(pixel_value)
                 else:
                     share = pixel_value / len(intersecting)
                     for cell_idx in intersecting:
                         results[cell_idx] += share
+                    distributed_raster_total += float(pixel_value)
 
             processed += 1
             if processed % 2000 == 0:
@@ -280,12 +283,16 @@ class SwissNetCDFToDGGSConverterAggregated:
         total_time = time.time() - start_time
         self.log_message(f"      Completed {num_non_zero} pixels in {total_time:.2f}s")
 
-        total_raster_value = np.sum(data)
-        total_weighted_value = np.sum(results)
-        if total_weighted_value != 0:
-            scaling = total_raster_value / total_weighted_value
-            results = results * scaling
-            self.log_message(f"      Applied scaling factor: {scaling:.6f}")
+        # Scale to match total of intersecting pixels (per variable)
+        total_raster_value = float(distributed_raster_total)
+        total_weighted_value = float(np.sum(results))
+        if total_weighted_value > 0.0 and total_raster_value > 0.0:
+            scaling_factor = total_raster_value / total_weighted_value
+            results = results * scaling_factor
+            self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
+            self.log_message(f"      Raster total (intersecting pixels): {total_raster_value:.6f} | DGGS total (after scaling): {float(np.sum(results)):.6f}")
+        else:
+            self.log_message("      Skipped scaling (zero total encountered)")
 
         return results.tolist()
 
@@ -356,35 +363,31 @@ class SwissNetCDFToDGGSConverterAggregated:
                     self.log_message(f"  Processing {len(ipcc_codes)} IPCC codes in parallel...")
                     weighted_dict = self.calculate_weighted_values_parallel_raster_first(raster_data, ipcc_codes)
                     for ipcc_code, values in weighted_dict.items():
-                        # Scaling summary per code
-                        total_raster_value = float(np.sum(raster_data[ipcc_code]['data']))
-                        total_weighted_value = float(np.sum(values))
-                        if total_weighted_value != 0:
-                            scaling_factor = total_raster_value / total_weighted_value
-                            values = (np.array(values, dtype=float) * scaling_factor).tolist()
-                            self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
-                            self.log_message(f"      Total raster value: {total_raster_value:.6f}")
-                            self.log_message(f"      Total weighted value (after scaling): {float(np.sum(values)):.6f}")
                         result_df[ipcc_code] = values
                 elif len(raster_data) == 1:
                     ipcc_code = list(raster_data.keys())[0]
                     values = self.calculate_weighted_values_raster_first(raster_data[ipcc_code], ipcc_code)
-                    total_raster_value = float(np.sum(raster_data[ipcc_code]['data']))
-                    total_weighted_value = float(np.sum(values))
-                    if total_weighted_value != 0:
-                        scaling_factor = total_raster_value / total_weighted_value
-                        values = (np.array(values, dtype=float) * scaling_factor).tolist()
-                        self.log_message(f"      Applied scaling factor: {scaling_factor:.6f}")
-                        self.log_message(f"      Total raster value: {total_raster_value:.6f}")
-                        self.log_message(f"      Total weighted value (after scaling): {float(np.sum(values)):.6f}")
                     result_df[ipcc_code] = values
                 else:
                     self.log_message("No aggregated variables found after lookup. Skipping.")
                     continue
 
-                # Remove rows with all zeros across IPCC columns
+                # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
                 value_cols = [c for c in result_df.columns if c != 'dggsID']
+                self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+                small_values_before = 0
+                for col in value_cols:
+                    small_mask = result_df[col] < 1e-6
+                    small_count = small_mask.sum()
+                    small_values_before += small_count
+                    result_df[col] = result_df[col].where(result_df[col] >= 1e-6, 0.0)
+                self.log_message(f"    Set {small_values_before} small values to zero across all columns")
+                
+                # Step 2: Remove rows with all zeros across IPCC columns
+                rows_before = len(result_df)
                 result_df = result_df[~(result_df[value_cols] == 0).all(axis=1)]
+                rows_after = len(result_df)
+                self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
                 result_df['Year'] = year
 
                 all_frames.append(result_df)
@@ -406,10 +409,28 @@ class SwissNetCDFToDGGSConverterAggregated:
         combined = pd.concat(all_frames, ignore_index=True)
         self.log_message(f"Combined shape: {combined.shape}")
         value_cols = [c for c in combined.columns if c not in ['dggsID', 'Year']]
+        
+        # Get value columns for processing
+        
+        # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
+        self.log_message(f"Final processing - Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+        small_values_before = 0
+        for col in value_cols:
+            small_mask = combined[col] < 1e-6
+            small_count = small_mask.sum()
+            small_values_before += small_count
+            combined[col] = combined[col].where(combined[col] >= 1e-6, 0.0)
+        self.log_message(f"  Set {small_values_before} small values to zero across all columns")
+        
+        # Step 2: Remove rows with all zeros
+        rows_before = len(combined)
         combined = combined[~(combined[value_cols] == 0).all(axis=1)]
+        rows_after = len(combined)
+        self.log_message(f"Final processing - Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+        
         self.log_message(f"After removing zero rows: {len(combined)} rows remain")
 
-        output_filename = "SWISS_DGGS_methane_emissions_2011.csv"
+        output_filename = "Switzerland_DGGS_methane_emissions_2011.csv"
         output_path = os.path.join(self.output_folder, output_filename)
         combined.to_csv(output_path, index=False)
         total_time = time.time() - start_time

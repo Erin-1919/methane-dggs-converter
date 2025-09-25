@@ -246,13 +246,28 @@ class GeojsonMerger:
         
         logger.info(f"Offshore features: {len(offshore_features)} total, {added_count} added, {duplicate_count} duplicates, {no_zoneid_count} no zoneID")
         
+        # Final safety: deduplicate by zoneID across all merged features (keep first occurrence)
+        seen_zone_ids = set()
+        deduped_features = []
+        removed_dups = 0
+        for feat in merged_features:
+            zid = feat.get('properties', {}).get('zoneID')
+            if zid:
+                if zid in seen_zone_ids:
+                    removed_dups += 1
+                    continue
+                seen_zone_ids.add(zid)
+            deduped_features.append(feat)
+        if removed_dups > 0:
+            logger.info(f"Removed {removed_dups} duplicate features by zoneID after merge")
+        
         # Update the merged data
         merged_data = country_data.copy()
-        merged_data['features'] = merged_features
+        merged_data['features'] = deduped_features
         
         # Update total grid cells count if it exists
         if 'properties' in merged_data and 'total_grid_cells' in merged_data['properties']:
-            merged_data['properties']['total_grid_cells'] = len(merged_features)
+            merged_data['properties']['total_grid_cells'] = len(deduped_features)
         
         return merged_data
     
@@ -332,6 +347,9 @@ class GeojsonMerger:
         
         # Copy remaining country files that don't have offshore data
         self.copy_remaining_country_files(country_files_index)
+
+        # Ensure no duplicate zoneID across ALL output geojson files
+        self.deduplicate_all_outputs()
     
     def copy_remaining_country_files(self, country_files_index: Dict[str, str]) -> None:
         """
@@ -364,6 +382,46 @@ class GeojsonMerger:
                         logger.error(f"Failed to copy {filename}: {e}")
         
         logger.info(f"Copied {copied_count} remaining country files")
+
+    def _deduplicate_output_file(self, file_path: Path) -> int:
+        """
+        Ensure the output GeoJSON file contains unique zoneID features.
+        Returns number of removed duplicates.
+        """
+        data = self.load_geojson_file(file_path)
+        if not data or 'features' not in data:
+            return 0
+        features = data.get('features', [])
+        seen = set()
+        dedup = []
+        removed = 0
+        for feat in features:
+            zid = feat.get('properties', {}).get('zoneID')
+            if zid and zid in seen:
+                removed += 1
+                continue
+            if zid:
+                seen.add(zid)
+            dedup.append(feat)
+        if removed > 0:
+            data['features'] = dedup
+            # Update total grid cells count if present
+            if 'properties' in data and 'total_grid_cells' in data['properties']:
+                data['properties']['total_grid_cells'] = len(dedup)
+            self.save_geojson_file(data, file_path)
+        return removed
+
+    def deduplicate_all_outputs(self) -> None:
+        """Run de-duplication across all output GeoJSON files and log summary."""
+        logger.info("Ensuring unique zoneID across all merged output files...")
+        total_removed = 0
+        files = list(self.output_dir.glob('*.geojson'))
+        for fp in files:
+            removed = self._deduplicate_output_file(fp)
+            if removed > 0:
+                logger.info(f"  {fp.name}: removed {removed} duplicate features by zoneID")
+            total_removed += removed
+        logger.info(f"De-duplication complete. Total duplicates removed across outputs: {total_removed}")
 
 
 def main():

@@ -611,14 +611,19 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
                     results[idx] = results[idx] + val
             total = float(np.sum(results))
             target_sum = float(aggregate_targets[gid])
+            # Per-country scaling: scale results so DGGS sum matches intersected raster target
             if total > 0.0 and target_sum > 0.0:
                 scale = target_sum / total
                 results = results * scale
                 self._log(f"  {gid}: Applied scaling factor: {scale:.6f}")
+            self._log(f"  {gid}: Total DGGS values: {float(np.sum(results)):.6f}")
+            self._log(f"  {gid}: Total raster values (intersected): {target_sum:.6f}")
             df = gdf[['zoneID']].copy().rename(columns={'zoneID': 'dggsID'})
             df['GID'] = gid
             df[ipcc_code] = results
             df['Year'] = year
+            # Single small-value pass at end: threshold < 1e-6 to zero, then drop zeros
+            df.loc[(df[ipcc_code] > 0) & (df[ipcc_code] < 1e-6), ipcc_code] = 0.0
             df = df[df[ipcc_code] > 0]
             if len(df) > 0:
                 path = self._save_country_df(df, variable, gid, year)
@@ -680,8 +685,20 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
         long_df = combined.melt(id_vars=id_cols, value_vars=value_columns, var_name='IPCC', value_name='value')
         long_df['value'] = long_df['value'].fillna(0.0)
         long_df = long_df.groupby(id_cols + ['IPCC'], as_index=False)['value'].sum()
+        
+        # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
+        small_values_before = (long_df['value'] < 1e-6).sum()
+        long_df['value'] = long_df['value'].where(long_df['value'] >= 1e-6, 0.0)
+        self._log(f"  Step 1: Set {small_values_before} small values (< 1e-6 Mg = 1g) to zero")
+        
+        # Step 2: Remove rows with zero values
+        rows_before = len(long_df)
         long_df = long_df[long_df['value'] > 0]
-        # Pivot to wide by IPCC code
+        rows_after = len(long_df)
+        self._log(f"  Step 2: Removed {rows_before - rows_after} rows with zero values ({rows_after} rows remaining)")
+        
+        # Step 3: Create wide format
+        self._log(f"  Step 3: Create wide format (pivot to IPCC columns)")
         wide_df = long_df.pivot_table(index=id_cols, columns='IPCC', values='value', aggfunc='sum', fill_value=0.0)
         wide_df = wide_df.reset_index()
         ipcc_cols = sorted([c for c in wide_df.columns if c not in id_cols])

@@ -6,8 +6,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
 #SBATCH --time=48:00:0
-#SBATCH --mem=48G
-#SBATCH --partition=cpu2021
+#SBATCH --mem=60G
+#SBATCH --partition=cpu2023
 #SBATCH --mail-user=mingke.li@ucalgary.ca
 #SBATCH --mail-type=END,FAIL
 
