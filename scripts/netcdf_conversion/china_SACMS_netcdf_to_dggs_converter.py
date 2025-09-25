@@ -715,8 +715,10 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
             raster_data = self.convert_aggregated_to_raster(netcdf_path)
             
             # Process all aggregated IPCC2006 codes using raster-first approach
-            self.log_message(f"Processing {len(raster_data)} aggregated IPCC2006 codes...")
-            
+            total_codes = len(raster_data)
+            self.log_message(f"Processing {total_codes} aggregated IPCC2006 codes...")
+            file_ipcc_mapping = {}
+            processed_idx = 0
             for ipcc_code, raster_info in raster_data.items():
                 self.log_message(f"  Processing aggregated IPCC2006 code: {ipcc_code}")
                 weighted_values = self.calculate_weighted_values_raster_first(
@@ -725,6 +727,11 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
                 
                 # Use IPCC2006 code as column name
                 result_df[ipcc_code] = weighted_values
+                file_ipcc_mapping[ipcc_code] = netcdf_filename
+                processed_idx += 1
+                self.log_message(
+                    f"      Processed {processed_idx}/{total_codes} IPCC codes ({processed_idx/total_codes*100:.1f}%)"
+                )
             
             # Remove rows where all values are 0 (except dggsID)
             value_columns = [col for col in result_df.columns if col != 'dggsID']
@@ -740,6 +747,10 @@ class ChinaSACMSNetCDFToDGGSConverterAggregated:
             result_df.to_csv(output_path, index=False)
             self.log_message(f"  Results saved to: {output_path}")
             self.log_message(f"  Output shape: {result_df.shape}")
+            if file_ipcc_mapping:
+                self.log_message("\nFile-IPCC Code Mapping:")
+                for ipcc_code, fname in file_ipcc_mapping.items():
+                    self.log_message(f"  {ipcc_code} -> {fname}")
             
             return output_path
             
