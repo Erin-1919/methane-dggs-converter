@@ -119,33 +119,12 @@ Utility scripts for data processing, combining, and cleanup:
     - Merges country and offshore DGGS grids
     - Handles duplicate zoneID removal
 
-20. **`combine_edgar_intermediate_to_final.py`**
-    - Combines EDGAR intermediate CSV files into final output
-    - Handles large-scale data aggregation
-
-21. **`cleanup_offshore_geojson.py`**
-    - Cleans and processes offshore GeoJSON data
-    - Removes invalid geometries and duplicates
-
-22. **`cleanup_small_values_in_csv.py`**
-    - Removes small emission values from CSV outputs
-    - Improves data quality and reduces file sizes
-
-### 📁 `scripts/test_scripts/`
-Test and validation scripts for development and debugging:
-
-- **`test_*_conversion.py`**: Individual conversion testing scripts
-- **`test_combine_*.py`**: Data combination testing scripts
-- **`test_explore_*.py`**: Data exploration and analysis scripts
-- **`test_check_*.py`**: Data validation and quality check scripts
-
 ### 📁 `SLURM_job_scripts/`
 HPC job scripts for running conversions on cluster systems:
 
 - **`run_*_conversion.sh`**: Individual conversion job scripts
 - **`combine_*.sh`**: Data combination job scripts
 - **`create_global_dggs_geom.sh`**: DGGS grid creation job script
-- **`debug_job.sh`**: Debugging and testing job script
 
 ## Workflow
 
@@ -154,36 +133,56 @@ HPC job scripts for running conversions on cluster systems:
 2. Simplify country geometries (`simplify_global_countries.py`)
 3. Convert to DGGS grid cells (`convert_country_geojson_to_dggs.py`)
 4. Convert offshore areas to DGGS (`convert_offshore_to_dggs.py`)
-5. Combine and merge grids (`combine_geojson_folder.py`, `merge_country_offshore_dggs_geometries.py`)
+5. Merge offshore grids and country grids (`merge_country_offshore_dggs_geometries.py`)
+6. Combine all grids to one single GeoJSON (`combine_geojson_folder.py`)
+7. Create local grids as parquet files (`convert_single_geojson_to_dggs.py`)
 
 ### Phase 2: Data Conversion to DGGS
-The project supports multiple data format conversions:
+All conversion processes output standardized CSV files with DGGS cell values in **Mg/year** units:
 
 #### NetCDF Conversion
-1. Use pre-calculated DGGS grids
-2. Convert NetCDF data to raster format
-3. Apply area-weighted distribution to DGGS cells
-4. Aggregate variables by IPCC2006 codes
-5. Output CSV files with DGGS cell values
+**Input Units**: Various (molecules CH₄ cm⁻² s⁻¹, Mg km⁻² a⁻¹, kg m⁻² s⁻¹, kg/h, g m⁻² yr⁻¹)
+**Output Units**: Mg/year (Megagrams per year)
+
+1. Load NetCDF data and extract variables
+2. Apply IPCC2006 code aggregation using lookup tables
+3. Convert NetCDF data to raster format
+4. Calculate pixel areas from coordinate reference system
+5. Convert input units to Mg/year using appropriate formulas:
+   - **Flux units** (molecules CH₄ cm⁻² s⁻¹): `mass_Mg = (flux × area × seconds_per_year / AVOGADRO) × M_CH4 × (1e-6)`
+   - **Emission rate units** (Mg km⁻² a⁻¹): `mass_Mg = emission_rate × area_km2`
+   - **Mass flux units** (kg m⁻² s⁻¹): `mass_Mg = flux × pixel_area_m2 × seconds_per_year / 1000`
+   - **Mass rate units** (kg/h): `mass_Mg = flux_kg_h × hours_per_year × (1e-3)`
+   - **Mass per area per year** (g m⁻² yr⁻¹): `mass_Mg = (value × pixel_area_m2) / 1e6`
+6. Apply area-weighted distribution to DGGS cells
+7. Apply scaling to preserve total emissions
+8. Output CSV files with DGGS cell values
 
 #### GeoTIFF Conversion
+**Input Units**: Mg km⁻² a⁻¹ (megagrams per square kilometer per year)
+**Output Units**: Mg/year (Megagrams per year)
+
 1. Load GeoTIFF raster data
-2. Rasterize DGGS cells to zone index raster
-3. Calculate pixel areas from raster CRS and transform
-4. Convert pixel values to total emissions (Mg/year)
-5. Aggregate to DGGS cells using numpy.bincount
+2. Map variable names to IPCC2006 codes using lookup tables
+3. Rasterize DGGS cells to zone index raster aligned with GeoTIFF grid
+4. Calculate pixel areas in km² from raster CRS and transform
+5. Convert pixel values to total emissions: `mass_Mg = pixel_value × pixel_area_km2`
+6. Aggregate to DGGS cells using numpy.bincount
+7. Apply scaling to preserve total emissions
+8. Output CSV files with DGGS cell values
 
 #### CSV Point Data Conversion
-1. Load CSV point data (lat, lon, value)
-2. Create regular grid raster from point data
-3. Rasterize DGGS polygons to label raster
-4. Aggregate per-pixel values to DGGS cells
-5. Apply scaling to preserve total emissions
+**Input Units**: ton/year (tons per year)
+**Output Units**: Mg/year (Megagrams per year)
 
-### Phase 3: Data Processing and Cleanup
-1. Combine intermediate results (`combine_edgar_intermediate_to_final.py`)
-2. Clean up small values (`cleanup_small_values_in_csv.py`)
-3. Validate and quality check outputs
+1. Load CSV point data (lat, lon, value)
+2. Create regular grid raster from point data in EPSG:4326
+3. Rasterize DGGS polygons to label raster aligned with the grid
+4. Aggregate per-pixel values to DGGS cells via numpy.bincount
+5. Convert units: `mass_Mg = value_ton × 1.0` (1 ton = 1 Mg)
+6. Apply scaling to preserve total emissions
+7. Output CSV files with DGGS cell values
+
 
 ## Data Sources
 
@@ -206,7 +205,6 @@ The project processes various gridded methane emission inventories from multiple
 
 
 ### Dataset Characteristics
-
 - **Spatial Coverage**: Ranges from country-specific (Switzerland, New York State) to global coverage
 - **Resolution**: Varies from high-resolution (100m × 100m) to coarser resolution (0.25° × 0.25°)
 - **Temporal Coverage**: Spans from 1970 to 2024, with most datasets covering recent years
@@ -215,32 +213,29 @@ The project processes various gridded methane emission inventories from multiple
 - **Source Categories**: Mixed category systems including IPCC 2006 codes, CRT codes, and some datasets without standardized codes
 
 ### Input Data
-- **NetCDF files**: Various methane emission datasets (EDGAR, GFEI, CMS, country-specific)
+- **NetCDF files**: Various methane emission datasets (EDGAR, GFEI, country-specific, local inventories, etc.)
 - **GeoTIFF files**: Raster methane emission data (China time series)
 - **CSV files**: Point-based emission data (India/Australia coal mining)
 - **Lookup tables**: IPCC2006 code mappings in `data/lookup/`
 - **Area data**: Grid cell area information in `data/area_npy/`
-- **GeoJSON files**: Country boundaries and offshore areas (generated during processing)
+- **GeoJSON files**: Pre-calculated rHEALPix DGGS grid geometries
 
 ### Output Data
-- **CSV files**: DGGS cell values with emission data (generated during processing)
-- **Processing logs**: Detailed logs generated during conversion (generated during processing)
+- **CSV files**: DGGS cell values with emission data
 
 ### Data Formats Supported
 - **NetCDF**: Multi-dimensional scientific data format
 - **GeoTIFF**: Georeferenced raster images
 - **CSV**: Point data with latitude, longitude, and values
-- **GeoJSON**: Vector geographic data format
 
 ## Key Features
-
 - **Pre-calculated grids**: Efficient processing using pre-computed DGGS grids
 - **Area-weighted distribution**: Accurate spatial allocation of emission values
 - **IPCC2006 aggregation**: Standardized emission categorization
 - **Multi-source support**: Handles various data formats and units (NetCDF, GeoTIFF, CSV)
 - **Parallel processing**: Optimized for large-scale data processing with multiprocessing
 - **Resume capability**: Can restart from intermediate results
-- **Unit conversion**: Automatic conversion between different emission units
+- **Unit conversion**: Automatic conversion between different emission units and final output unit as Mg/year
 - **HPC support**: SLURM job scripts for cluster computing
 - **Comprehensive logging**: Detailed processing logs for debugging and monitoring
 
@@ -249,10 +244,8 @@ The project processes various gridded methane emission inventories from multiple
 
 ### 1. Create DGGS Grids (Run Once)
 ```bash
-# Create global country boundaries
+# Create global country boundaries and simplify the geometries
 python scripts/dggs_grid_creation/create_global_country_geojson.py
-
-# Simplify geometries
 python scripts/dggs_grid_creation/simplify_global_countries.py
 
 # Convert to DGGS format
@@ -261,9 +254,14 @@ python scripts/dggs_grid_creation/convert_country_geojson_to_dggs.py
 # Convert offshore areas
 python scripts/dggs_grid_creation/convert_offshore_to_dggs.py
 
-# Combine and merge grids
-python scripts/utilities/combine_geojson_folder.py
+# Merge offshore grids and country grids
 python scripts/utilities/merge_country_offshore_dggs_geometries.py
+
+# Combine all grids to one single geojson
+python scripts/utilities/combine_geojson_folder.py
+
+# Create local grids (as parquet)
+python scripts/dggs_grid_creation/convert_single_geojson_to_dggs
 ```
 
 ### 2. Convert Data to DGGS (Run as Needed)
@@ -280,11 +278,11 @@ python scripts/netcdf_conversion/us_netcdf_to_dggs_converter.py
 python scripts/netcdf_conversion/mexico_netcdf_to_dggs_converter.py
 python scripts/netcdf_conversion/swiss_netcdf_to_dggs_converter.py
 python scripts/netcdf_conversion/china_SACMS_netcdf_to_dggs_converter.py
-python scripts/netcdf_conversion/nys_netcdf_to_dggs_converter.py
 
 # Specialized datasets
 python scripts/netcdf_conversion/cms_netcdf_to_dggs_converter.py
 python scripts/netcdf_conversion/us_OG_netcdf_to_dggs_converter.py
+python scripts/netcdf_conversion/nys_netcdf_to_dggs_converter.py
 ```
 
 #### GeoTIFF Conversions
@@ -299,19 +297,7 @@ python scripts/geotiff_conversion/china_tiff_to_dggs_converter.py
 python scripts/csv_conversion/ind_aus_csv_to_dggs_converter.py
 ```
 
-### 3. Data Processing and Cleanup
-```bash
-# Combine intermediate results
-python scripts/utilities/combine_edgar_intermediate_to_final.py
-
-# Clean up small values
-python scripts/utilities/cleanup_small_values_in_csv.py
-
-# Clean offshore data
-python scripts/utilities/cleanup_offshore_geojson.py
-```
-
-### 4. HPC Cluster Usage
+### 3. HPC Cluster Usage
 ```bash
 # Submit individual conversion jobs
 sbatch SLURM_job_scripts/run_canada_netcdf_conversion.sh
@@ -326,9 +312,4 @@ sbatch SLURM_job_scripts/combine_geojson.sh
 sbatch SLURM_job_scripts/create_global_dggs_geom.sh
 ```
 
-### 5. Debugging and Troubleshooting
-```bash
-# Use debug job script for HPC troubleshooting
-sbatch SLURM_job_scripts/debug_job.sh
-```
 
