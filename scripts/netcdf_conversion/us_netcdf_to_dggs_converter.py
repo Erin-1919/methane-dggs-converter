@@ -560,6 +560,32 @@ class USNetCDFToDGGSConverterAggregated:
         
         return result_dict
     
+    def _check_existing_csv_files(self, test_output_folder):
+        """
+        Check which year CSV files already exist in the test output folder.
+        
+        Args:
+            test_output_folder (str): Path to the test output folder
+            
+        Returns:
+            set: Set of years that already have CSV files
+        """
+        existing_years = set()
+        
+        if not os.path.exists(test_output_folder):
+            return existing_years
+        
+        # Look for files matching the pattern: US_DGGS_methane_emissions_YYYY.csv
+        for filename in os.listdir(test_output_folder):
+            if filename.startswith("US_DGGS_methane_emissions_") and filename.endswith(".csv"):
+                # Extract year from filename
+                year_match = re.search(r'US_DGGS_methane_emissions_(\d{4})\.csv', filename)
+                if year_match:
+                    year = int(year_match.group(1))
+                    existing_years.add(year)
+        
+        return existing_years
+    
     def _process_single_ipcc_code_raster_first(self, args, dggs_grid):
         """
         Process a single aggregated IPCC2006 code for multiprocessing using raster-first approach.
@@ -594,9 +620,17 @@ class USNetCDFToDGGSConverterAggregated:
         Process all NetCDF files and combine them into a single CSV output.
         Variables are aggregated by IPCC2006 codes before raster conversion.
         Each file is processed separately and saved individually, then combined.
+        Skips processing for years that already have CSV files.
         """
         start_time = time.time()
         self.log_message(f"Processing all {len(self.netcdf_files)} NetCDF files with IPCC2006 code aggregation...")
+        
+        # Check which year CSV files already exist
+        test_output_folder = "test/test_us_csv"
+        os.makedirs(test_output_folder, exist_ok=True)
+        
+        existing_years = self._check_existing_csv_files(test_output_folder)
+        self.log_message(f"Found {len(existing_years)} existing year CSV files: {sorted(existing_years)}")
         
         # List to store all individual dataframes
         all_dataframes = []
@@ -606,9 +640,43 @@ class USNetCDFToDGGSConverterAggregated:
         file_ipcc_mapping = {}
         
         # Process each NetCDF file separately
-        for file_index, netcdf_filename in enumerate(self.netcdf_files):
+        files_to_process = []
+        for netcdf_filename in self.netcdf_files:
+            try:
+                year = self.extract_year_from_filename(netcdf_filename)
+                if year not in existing_years:
+                    files_to_process.append((netcdf_filename, year))
+                else:
+                    self.log_message(f"Skipping {netcdf_filename} (year {year} already processed)")
+            except ValueError as e:
+                self.log_message(f"Warning: Could not extract year from {netcdf_filename}: {e}")
+                files_to_process.append((netcdf_filename, None))
+        
+        self.log_message(f"Will process {len(files_to_process)} files, skip {len(self.netcdf_files) - len(files_to_process)} existing files")
+        
+        # Load existing CSV files first
+        if existing_years:
+            self.log_message(f"Loading {len(existing_years)} existing CSV files...")
+            for year in existing_years:
+                existing_csv_path = os.path.join(test_output_folder, f"US_DGGS_methane_emissions_{year}.csv")
+                if os.path.exists(existing_csv_path):
+                    try:
+                        existing_df = pd.read_csv(existing_csv_path)
+                        all_dataframes.append(existing_df)
+                        self.log_message(f"  Loaded existing CSV for year {year}: {existing_df.shape}")
+                        
+                        # Track IPCC codes from existing files
+                        value_cols = [col for col in existing_df.columns if col not in ['dggsID', 'Year']]
+                        for col in value_cols:
+                            all_ipcc_codes[col] = existing_df[col].values
+                            file_ipcc_mapping[col] = f"existing_{year}.csv"
+                    except Exception as e:
+                        self.log_message(f"  Error loading existing CSV for year {year}: {e}")
+        
+        # Process new files
+        for file_index, (netcdf_filename, year) in enumerate(files_to_process):
             self.log_message(f"\n{'='*60}")
-            self.log_message(f"PROCESSING FILE {file_index + 1}/{len(self.netcdf_files)}: {netcdf_filename}")
+            self.log_message(f"PROCESSING FILE {file_index + 1}/{len(files_to_process)}: {netcdf_filename}")
             self.log_message(f"{'='*60}")
             
             netcdf_path = os.path.join(self.netcdf_folder, netcdf_filename)
@@ -618,9 +686,10 @@ class USNetCDFToDGGSConverterAggregated:
                 continue
             
             try:
-                # Extract year from filename
-                year = self.extract_year_from_filename(netcdf_filename)
-                self.log_message(f"  Extracted year: {year}")
+                # Extract year from filename if not already extracted
+                if year is None:
+                    year = self.extract_year_from_filename(netcdf_filename)
+                self.log_message(f"  Processing year: {year}")
                 
                 # Initialize result dataframe for this year with DGGS cell IDs (zoneID)
                 year_result_df = self.dggs_grid[['zoneID']].copy()
@@ -655,22 +724,22 @@ class USNetCDFToDGGSConverterAggregated:
                     all_ipcc_codes[ipcc_code] = weighted_values
                     file_ipcc_mapping[ipcc_code] = netcdf_filename
                 
-            # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
-            value_columns = [col for col in year_result_df.columns if col != 'dggsID']
-            self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
-            small_values_before = 0
-            for col in value_columns:
-                small_mask = year_result_df[col] < 1e-6
-                small_count = small_mask.sum()
-                small_values_before += small_count
-                year_result_df[col] = year_result_df[col].where(year_result_df[col] >= 1e-6, 0.0)
-            self.log_message(f"    Set {small_values_before} small values to zero across all columns")
-            
-            # Step 2: Remove rows where all values are 0 (except dggsID) for this year
-            rows_before = len(year_result_df)
-            year_result_df = year_result_df[~(year_result_df[value_columns] == 0).all(axis=1)]
-            rows_after = len(year_result_df)
-            self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
+                # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
+                value_columns = [col for col in year_result_df.columns if col != 'dggsID']
+                self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+                small_values_before = 0
+                for col in value_columns:
+                    small_mask = year_result_df[col] < 1e-6
+                    small_count = small_mask.sum()
+                    small_values_before += small_count
+                    year_result_df[col] = year_result_df[col].where(year_result_df[col] >= 1e-6, 0.0)
+                self.log_message(f"    Set {small_values_before} small values to zero across all columns")
+                
+                # Step 2: Remove rows where all values are 0 (except dggsID) for this year
+                rows_before = len(year_result_df)
+                year_result_df = year_result_df[~(year_result_df[value_columns] == 0).all(axis=1)]
+                rows_after = len(year_result_df)
+                self.log_message(f"  Step 2: Removed {rows_before - rows_after} rows with all zero values ({rows_after} rows remaining)")
                 
                 # Add Year column with specific year for this file
                 year_result_df['Year'] = year
@@ -744,7 +813,10 @@ class USNetCDFToDGGSConverterAggregated:
             self.log_message(f"\n{'='*60}")
             self.log_message(f"PROCESSING SUMMARY")
             self.log_message(f"{'='*60}")
-            self.log_message(f"Total NetCDF files processed: {len(self.netcdf_files)}")
+            self.log_message(f"Total NetCDF files available: {len(self.netcdf_files)}")
+            self.log_message(f"Files processed this run: {len(files_to_process)}")
+            self.log_message(f"Files skipped (already exist): {len(self.netcdf_files) - len(files_to_process)}")
+            self.log_message(f"Existing CSV files loaded: {len(existing_years)}")
             self.log_message(f"Total aggregated IPCC2006 codes: {len(all_ipcc_codes)}")
             self.log_message(f"Individual year CSVs saved to: {test_output_folder}")
             self.log_message(f"Combined output columns: {len(combined_df.columns)}")

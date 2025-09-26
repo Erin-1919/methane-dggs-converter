@@ -185,7 +185,34 @@ The project supports multiple data format conversions:
 2. Clean up small values (`cleanup_small_values_in_csv.py`)
 3. Validate and quality check outputs
 
-## Data Structure
+## Data Sources
+
+The project processes various gridded methane emission inventories from multiple sources. Below is a comprehensive table of all datasets used:
+
+| Dataset Name | Spatial Coverage | CRS | Resolution | Temporal Coverage | Files | CRT/IPCC | Sector | Unit | Area Unit | Note | URL |
+|--------------|-----------------|-----|------------|-------------------|-------|----------|--------|------|-----------|------|-----|
+| EDGAR v8.0 Greenhouse Gas CH4 Emissions | Global | EPSG 4326 | 0.1° × 0.1° | 1970-2022 | 1272 | IPCC 2006 code | Agriculture, chemical, fuel, energy, natural gas, petroleum, waste | ton/year | - | - | [EDGAR](https://data.jrc.ec.europa.eu/dataset/b54d8149-2864-4fb9-96b9-5fd3a020c224) |
+| U.S. Anthropogenic Methane Emissions | U.S. | EPSG 4326 | 0.1° × 0.1° | 2012-2018 | 7 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | molecules CH₄ cm⁻² s⁻¹ | cm² | - | [US EPA](https://zenodo.org/records/8367082) |
+| Mexico Anthropogenic Methane Emissions | Mexico | EPSG 4326 | 0.1° × 0.1° | 2015 | 1 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | Mg a⁻¹ km⁻² | - | - | [Mexico Inventory](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/5FUTWM) |
+| Global Fuel Exploitation Inventory GFEI | Global | EPSG 4326 | 0.1° × 0.1° | 2016-2020 | 21(v1) 20(v2) 20(v3) | CRT | Coal mines, oil and gas | Mg a⁻¹ km⁻² | - | Multiple versions available | [GFEI](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi%3A10.7910%2FDVN%2FHH4EUM&version=&q=&fileTypeGroupFacet=&fileTag=&fileSortField=&fileSortOrder=&tagPresort=true&folderPresort=true) |
+| Canada Anthropogenic Methane Emissions | Canada | EPSG 4326 | 0.1° × 0.1° | 2018 | 1 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | Mg a⁻¹ km⁻² | - | - | [Canada Inventory](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/CC3KLO) |
+| Gridded New York State methane emissions inventory (GNYS) | New York State | UTM Zone 18N projection EPSG:26918 | 100m × 100m | 2020 | 1 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | kg m⁻² s⁻¹ | m² | - | [NYS Inventory](https://zenodo.org/records/16761163) |
+| US oil and gas methane emissions | U.S. | EPSG 4326 | 0.1° × 0.1° | 2021 | 1 | IPCC 2006 code | Oil and gas | kg/h | - | - | [US OG](https://zenodo.org/records/10909191) |
+| Carbon Monitoring System (CMS) data sets on Methane (CH₄) Flux | Canada and Mexico | EPSG 4326 | 0.1° × 0.1° | 2010 - Mexico 2013 - Canada | 2 | IPCC 2006 code | Oil and gas | molecules CH₄ cm⁻² s⁻¹ | cm² | - | [CMS Mexico](https://disc.gsfc.nasa.gov/datasets/CMS_CH4_FLX_MX_1/summary?keywords=methane%20emissions%20from%20Canadian%20and%20Mexican%20oil%20and%20gas%20systems), [CMS Canada](https://disc.gsfc.nasa.gov/datasets/CMS_CH4_FLX_CA_1/summary?keywords=methane%20emissions%20from%20Canadian%20and%20Mexican%20oil%20and%20gas%20systems) |
+| Swiss Greenhouse Gas Inventory (SGHGI) | Switzerland | CH1903/LV03 EPSG:21781 | 500 m × 500 m | 2011 | 1 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | g m⁻² yr⁻¹ | m² | - | [SGHGI](https://doi.pangaea.de/10.1594/PANGAEA.828262) |
+| China coal mine methane emissions | China | EPSG 4326 | 0.25° × 0.25° | 2011 | 1 | IPCC 2006 code | Coal mines | Mg km⁻² a⁻¹ | - | - | [China SACMS](https://forms.gle/NGMXUTfMumMFkMZPA) |
+| India and Australia coal mine methane emissions | India and Australia | EPSG 4326 | 0.1° × 0.1° | 2018 | 2 (csv) | IPCC 2006 code | Coal mines | ton/year | - | Provided as CSV | [India/Australia](https://zenodo.org/records/6222441) |
+| CHN-CH₄ Anthropogenic Methane Emission Inventory of China | China | EPSG 4326 | 0.1° × 0.1° | 1990-2020 | 8×31 (tiff) | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | Mg km⁻² a⁻¹ | - | Provided as TIFF | [China CHN-CH₄](https://zenodo.org/records/15107383) |
+
+
+### Dataset Characteristics
+
+- **Spatial Coverage**: Ranges from country-specific (Switzerland, New York State) to global coverage
+- **Resolution**: Varies from high-resolution (100m × 100m) to coarser resolution (0.25° × 0.25°)
+- **Temporal Coverage**: Spans from 1970 to 2024, with most datasets covering recent years
+- **Units**: Diverse units including flux (molecules CH₄ cm⁻² s⁻¹), mass per area per time (Mg km⁻² a⁻¹), and total emissions (ton/year)
+- **File Formats**: Primarily NetCDF files, with some CSV and GeoTIFF formats
+- **Source Categories**: Mixed category systems including IPCC 2006 codes, CRT codes, and some datasets without standardized codes
 
 ### Input Data
 - **NetCDF files**: Various methane emission datasets (EDGAR, GFEI, CMS, country-specific)
