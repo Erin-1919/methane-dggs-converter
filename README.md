@@ -201,7 +201,7 @@ The project processes various gridded methane emission inventories from multiple
 | Swiss Greenhouse Gas Inventory (SGHGI) | Switzerland | CH1903/LV03 EPSG:21781 | 500 m × 500 m | 2011 | 1 | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | g m⁻² yr⁻¹ | m² | - | [SGHGI](https://doi.pangaea.de/10.1594/PANGAEA.828262) |
 | China coal mine methane emissions | China | EPSG 4326 | 0.25° × 0.25° | 2011 | 1 | IPCC 2006 code | Coal mines | Mg km⁻² a⁻¹ | - | - | [China SACMS](https://forms.gle/NGMXUTfMumMFkMZPA) |
 | India and Australia coal mine methane emissions | India and Australia | EPSG 4326 | 0.1° × 0.1° | 2018 | 2 (csv) | IPCC 2006 code | Coal mines | ton/year | - | Provided as CSV | [India/Australia](https://zenodo.org/records/6222441) |
-| CHN-CH₄ Anthropogenic Methane Emission Inventory of China | China | EPSG 4326 | 0.1° × 0.1° | 1990-2020 | 8×31 (tiff) | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | Mg km⁻² a⁻¹ | - | Provided as TIFF | [China CHN-CH₄](https://zenodo.org/records/15107383) |
+| CHN-CH₄ Anthropogenic Methane Emission Inventory of China | China | Krasovsky 1940 Albers projection | 0.1° × 0.1° | 1990-2020 | 8×31 (tiff) | IPCC 2006 code | Coal mines, oil and gas, residential combustion, solid waste, wastewater | Mg km⁻² a⁻¹ | - | Provided as TIFF | [China CHN-CH₄](https://zenodo.org/records/15107383) |
 
 
 ### Dataset Characteristics

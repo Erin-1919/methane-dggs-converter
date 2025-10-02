@@ -12,6 +12,7 @@ import pandas as pd
 import geopandas as gpd
 import rasterio
 from rasterio.features import rasterize
+from shapely.geometry import Polygon
 
 
 class ChinaTIFFToDGGSConverter:
@@ -28,10 +29,12 @@ class ChinaTIFFToDGGSConverter:
     - Combined CSV in output/: China_DGGS_methane_emissions_ALL_FILES.csv.
 
     Method:
-    - Rasterize DGGS cells once to a zone index raster aligned to the GeoTIFF grid (value = DGGS row index+1; 0 for background).
+    - For projected rasters (e.g., Krasovsky_1940_Albers), distribute each pixel's mass to intersecting DGGS cells by intersection area in the raster CRS.
     - Compute per-pixel area in km^2 from the raster's CRS and transform.
+      • Projected CRSs (e.g., Krasovsky_1940_Albers): area per pixel = |a*e - b*d| (affine determinant) in m^2.
+      • Geographic CRS (EPSG:4326): spherical cap formula varying with latitude.
     - Convert pixel values to Mg/year by multiplying Mg km^-2 a^-1 by pixel_area_km2.
-    - Aggregate to DGGS cells via numpy.bincount using the zone index raster.
+    - Aggregate to DGGS cells via area-weighted intersection (projected) or via a label raster fallback (geographic).
     - Stream per year over variables to minimize memory.
     """
 
@@ -60,6 +63,44 @@ class ChinaTIFFToDGGSConverter:
         # Cache for zone index raster and per-pixel area array per grid key
         self._zone_index_cache = {}
         self._pixel_area_cache = {}
+        # Cache for projected DGGS grid and bounds per CRS
+        self._proj_dggs_cache = {}
+
+    def _ensure_projected_dggs(self, crs):
+        """Project DGGS grid to the provided CRS and cache with bounds."""
+        crs_key = crs.to_string() if crs is not None else ""
+        if crs_key in self._proj_dggs_cache:
+            return self._proj_dggs_cache[crs_key]
+        self.log_message("Projecting DGGS grid to raster CRS for area-weighted intersections...")
+        dggs_proj = self.dggs_grid_wgs84.to_crs(crs)
+        bounds_list = []
+        for idx, row in dggs_proj.iterrows():
+            bounds_list.append((row.geometry.bounds, idx))
+        cache_entry = {"gdf": dggs_proj, "bounds": bounds_list}
+        self._proj_dggs_cache[crs_key] = cache_entry
+        self.log_message(f"  Projected DGGS cached for CRS: {crs_key}")
+        return cache_entry
+
+    def _pixel_polygon(self, transform, row, col):
+        """Return pixel polygon (parallelogram) at (row, col) using the affine transform."""
+        x0, y0 = (transform * (col, row))
+        x1, y1 = (transform * (col + 1, row))
+        x2, y2 = (transform * (col + 1, row + 1))
+        x3, y3 = (transform * (col, row + 1))
+        return Polygon([(x0, y0), (x1, y1), (x2, y2), (x3, y3)])
+
+    def _find_intersecting_cells_projected(self, pixel_geom, dggs_cache):
+        """Return list of DGGS indices that intersect the pixel geometry (bounds prefilter)."""
+        intersecting = []
+        minx, miny, maxx, maxy = pixel_geom.bounds
+        for bounds, idx in dggs_cache["bounds"]:
+            if not (maxx < bounds[0] or minx > bounds[2] or maxy < bounds[1] or miny > bounds[3]):
+                try:
+                    if pixel_geom.intersects(dggs_cache["gdf"].iloc[idx].geometry):
+                        intersecting.append(idx)
+                except Exception:
+                    continue
+        return intersecting
 
     def _setup_logging(self):
         log_folder = "log"
@@ -130,21 +171,31 @@ class ChinaTIFFToDGGSConverter:
         if key in self._pixel_area_cache:
             return self._pixel_area_cache[key]
 
-        if crs is not None and crs.is_geographic:
-            # Expect 0.1° × 0.1° pixels in EPSG:4326; handle sign of transform.e
+        # Log CRS information once per unique grid
+        epsg = None
+        crs_str = None
+        if crs is not None:
+            try:
+                epsg = crs.to_epsg()
+            except Exception:
+                epsg = None
+            try:
+                crs_str = crs.to_string()
+            except Exception:
+                crs_str = str(crs)
+        if epsg is not None:
+            self.log_message(f"  Raster CRS: EPSG:{epsg}")
+        elif crs is not None and crs_str is not None:
+            self.log_message(f"  Raster CRS: {crs_str}")
+
+        if crs is not None and getattr(crs, "is_geographic", False):
+            # Expect ~0.1° × 0.1° pixels in EPSG:4326; handle sign of transform.e
             delta_lon = abs(transform.a)
             delta_lat = abs(transform.e)
             if abs(delta_lon - 0.1) > 1e-6 or abs(delta_lat - 0.1) > 1e-6:
                 self.log_message(
                     f"  Warning: Detected geographic pixel size ~{delta_lon:.6f}×{delta_lat:.6f} degrees (expected 0.1×0.1)"
                 )
-            epsg = None
-            try:
-                epsg = crs.to_epsg()
-            except Exception:
-                epsg = None
-            if epsg is not None:
-                self.log_message(f"  Raster CRS: EPSG:{epsg}")
 
             lon_rad = math.radians(delta_lon)
             lat_half_rad = math.radians(delta_lat) / 2.0
@@ -160,11 +211,20 @@ class ChinaTIFFToDGGSConverter:
             area_km2_row = (area_m2_row / 1e6).astype(np.float32)
             pixel_area_km2 = np.repeat(area_km2_row[:, np.newaxis], width, axis=1)
         else:
-            pixel_width = abs(transform.a)
-            pixel_height = abs(transform.e)
-            area_m2 = pixel_width * pixel_height
-            area_km2 = (area_m2 / 1e6)
-            pixel_area_km2 = np.full((height, width), area_km2, dtype=np.float32)
+            # Projected CRS (e.g., Krasovsky_1940_Albers) or unknown: use affine determinant
+            # 2x2 part of affine transform is [[a, b],[d, e]]; pixel area (m^2) = |a*e - b*d|
+            det = abs((float(transform.a) * float(transform.e)) - (float(transform.b) * float(transform.d)))
+            if det == 0.0:
+                # Fallback to width*height if determinant is zero (should not happen for valid rasters)
+                pixel_width = abs(float(transform.a))
+                pixel_height = abs(float(transform.e))
+                det = pixel_width * pixel_height
+            self.log_message(
+                f"  Projected pixel transform (a,b,d,e): {float(transform.a):.6f}, {float(transform.b):.6f}, {float(transform.d):.6f}, {float(transform.e):.6f}"
+            )
+            self.log_message(f"  Using affine determinant for pixel area: {det:.6f} m^2")
+            area_km2 = (det / 1e6)
+            pixel_area_km2 = np.full((height, width), float(area_km2), dtype=np.float32)
 
         self._pixel_area_cache[key] = pixel_area_km2
         return pixel_area_km2
@@ -186,27 +246,73 @@ class ChinaTIFFToDGGSConverter:
             crs = src.crs
 
         pixel_area_km2 = self._compute_pixel_area_km2(crs, transform, width, height)
-        label_raster = self._build_zone_index_raster(crs, transform, width, height)
 
         mass_per_pixel = data * pixel_area_km2
+        # Units: data is Mg km^-2 a^-1, pixel_area_km2 is km^2 → mass_per_pixel is Mg/year
+        self.log_message("  Unit check: values are 'Mg km^-2 a^-1' × pixel_area_km2 (km^2) ⇒ Mg/year per pixel")
         mass_per_pixel = np.nan_to_num(mass_per_pixel, nan=0.0)
         mass_per_pixel = np.clip(mass_per_pixel, 0, None)
 
-        labels = label_raster.ravel()
-        values = mass_per_pixel.ravel()
-        sums = np.bincount(labels, weights=values, minlength=self.num_cells + 1)[1:]
-
-        # Use flattened arrays consistently when masking by labels
-        total_raster_value = float(np.sum(values[labels > 0]))
-        total_weighted_value = float(np.sum(sums))
-
-        # Scale per variable to match intersecting pixel total
-        if total_weighted_value > 0.0 and total_raster_value > 0.0:
-            scaling_factor = total_raster_value / total_weighted_value
-            sums = sums * scaling_factor
-            self.log_message(f"      Applied scaling factor for {ipcc_code}: {scaling_factor:.6f}")
-
-        return ipcc_code, sums, total_raster_value, float(np.sum(sums))
+        # Projected CRS: area-weighted intersection; Geographic CRS: fallback to label raster
+        if crs is not None and not getattr(crs, "is_geographic", False):
+            dggs_cache = self._ensure_projected_dggs(crs)
+            results = np.zeros(self.num_cells, dtype=np.float64)
+            non_zero = np.where(mass_per_pixel > 0)
+            num_non_zero = len(non_zero[0])
+            if num_non_zero == 0:
+                return ipcc_code, results, 0.0, 0.0
+            self.log_message(f"      Non-zero pixels to distribute (projected): {num_non_zero}")
+            start_time = time.time()
+            for i in range(num_non_zero):
+                row = int(non_zero[0][i])
+                col = int(non_zero[1][i])
+                pixel_value = float(mass_per_pixel[row, col])
+                pixel_geom = self._pixel_polygon(transform, row, col)
+                intersecting = self._find_intersecting_cells_projected(pixel_geom, dggs_cache)
+                if intersecting:
+                    total_area = 0.0
+                    areas = []
+                    for idx in intersecting:
+                        try:
+                            inter = pixel_geom.intersection(dggs_cache["gdf"].iloc[idx].geometry)
+                            area = inter.area
+                        except Exception:
+                            area = 0.0
+                        areas.append(area)
+                        total_area += area
+                    if total_area > 0.0:
+                        for j, idx in enumerate(intersecting):
+                            results[idx] += pixel_value * (areas[j] / total_area)
+                    else:
+                        share = pixel_value / len(intersecting)
+                        for idx in intersecting:
+                            results[idx] += share
+                if (i + 1) % 2000 == 0:
+                    elapsed = time.time() - start_time
+                    rate = (i + 1) / elapsed if elapsed > 0 else 0.0
+                    remaining = (num_non_zero - (i + 1)) / rate if rate > 0 else 0.0
+                    self.log_message(
+                        f"        Processed {i + 1}/{num_non_zero} ({(i + 1)/num_non_zero*100:.1f}%) - ETA: {remaining:.1f}s"
+                    )
+            total_raster_value = float(np.sum(mass_per_pixel))
+            total_weighted_value = float(np.sum(results))
+            if total_weighted_value > 0.0 and total_raster_value > 0.0:
+                scaling_factor = total_raster_value / total_weighted_value
+                results = results * scaling_factor
+                self.log_message(f"      Applied scaling factor for {ipcc_code}: {scaling_factor:.6f}")
+            return ipcc_code, results, total_raster_value, float(np.sum(results))
+        else:
+            label_raster = self._build_zone_index_raster(crs, transform, width, height)
+            labels = label_raster.ravel()
+            values = mass_per_pixel.ravel()
+            sums = np.bincount(labels, weights=values, minlength=self.num_cells + 1)[1:]
+            total_raster_value = float(np.sum(values[labels > 0]))
+            total_weighted_value = float(np.sum(sums))
+            if total_weighted_value > 0.0 and total_raster_value > 0.0:
+                scaling_factor = total_raster_value / total_weighted_value
+                sums = sums * scaling_factor
+                self.log_message(f"      Applied scaling factor for {ipcc_code}: {scaling_factor:.6f}")
+            return ipcc_code, sums, total_raster_value, float(np.sum(sums))
 
     def _list_variable_dirs(self):
         all_entries = [os.path.join(self.root_folder, d) for d in os.listdir(self.root_folder)]
