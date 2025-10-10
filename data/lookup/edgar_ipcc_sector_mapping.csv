@@ -9,7 +9,6 @@ IND,Combustion for manufacturing,1A2,1A2
 IRO,Iron and steel production,2C1a+2C1c+2C1d+2C1e+2C1f+2C2,2C1+2C2
 MNM,Manure management,4B,3A2
 N2O,Indirect N2O emissions from agriculture,4D3,3C5+3C6
-PRO_FFF,Fuel exploitation (including fossil fuel fires),1B1a+1B2a1+1B2a2+1B2a3+1B2a4+1B2c+7A,1B1a+1B2aiii2+1B2aiii3+1B2bi+1B2bii+5B
 PRO_COAL,Fuel exploitation COAL,1B1a,1B1a
 PRO_GAS,Fuel exploitation GAS,1B2c,1B2bi+1B2bii
 PRO_OIL,Fuel exploitation OIL,1B2a1+1B2a2+1B2a3+1B2a4,1B2aiii2+1B2aiii3

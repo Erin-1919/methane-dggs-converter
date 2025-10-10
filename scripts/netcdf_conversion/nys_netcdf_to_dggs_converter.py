@@ -47,6 +47,10 @@ class NYSNetCDFToDGGSConverterAggregated:
         self.SECONDS_PER_YEAR = 365 * 24 * 3600
         self.PIXEL_SIZE_M = 100.0
         self.PIXEL_AREA_M2 = self.PIXEL_SIZE_M * self.PIXEL_SIZE_M  # 10,000 m^2
+        # Configurable threshold for small values (Mg). Can override via env var SMALL_VALUE_THRESHOLD
+        self.SMALL_VALUE_THRESHOLD = float(os.environ.get('SMALL_VALUE_THRESHOLD', '1e-6'))
+        # Default y axis orientation assumption; will be set per dataset
+        self.y_descending = True
 
         # Logging
         self._setup_logging()
@@ -191,7 +195,7 @@ class NYSNetCDFToDGGSConverterAggregated:
             transform=transform,
             fill=0,
             dtype='int32',
-            all_touched=False
+            all_touched=True
         )
         self.zone_index_raster = label_raster
         self.log_message("  Zone index raster built")
@@ -200,27 +204,31 @@ class NYSNetCDFToDGGSConverterAggregated:
     def _compute_mass_per_pixel_for_ipcc(self, ds, var_list):
         """Stream-sum variables for an IPCC code and convert to Mg/year per pixel.
         Units: kg m^-2 s^-1; area 100x100m; seconds per year.
+        NaN/inf treated as 0 and negatives clipped to 0 before summation.
         """
-        acc = None
+        stack = []
         for v in var_list:
             arr = ds[v].values
             if arr.ndim == 3:
                 arr = arr[0, :, :]
             elif arr.ndim != 2:
                 raise ValueError(f"Unexpected dims for variable {v}: {arr.shape}")
-            acc = arr if acc is None else acc + arr
-        if acc is None:
+            arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+            arr = np.clip(arr, 0, None)
+            stack.append(arr)
+        if not stack:
             return None
+        acc = np.sum(stack, axis=0)
         mass_per_pixel = acc * self.PIXEL_AREA_M2 * self.SECONDS_PER_YEAR / 1000.0
-        mass_per_pixel = np.nan_to_num(mass_per_pixel, nan=0.0)
-        negative_mask = mass_per_pixel < 0
-        if np.any(negative_mask):
-            mass_per_pixel = np.clip(mass_per_pixel, 0, None)
         return mass_per_pixel
 
     def _sum_pixels_to_cells(self, mass_per_pixel):
-        """Sum per-pixel masses to DGGS cells using the precomputed label raster."""
+        """Sum per-pixel masses to DGGS cells using the precomputed label raster.
+        Align orientation if the dataset y-axis is ascending (bottom->top).
+        """
         labels = self.zone_index_raster
+        if not getattr(self, 'y_descending', True):
+            labels = np.flipud(labels)
         flat_labels = labels.ravel()
         flat_values = mass_per_pixel.ravel()
         max_label = len(self.dggs_grid_proj)
@@ -396,6 +404,11 @@ class NYSNetCDFToDGGSConverterAggregated:
                     raise ValueError("Could not locate x/y (or lon/lat) coordinates in NetCDF")
                 x = ds[x_name].values
                 y = ds[y_name].values
+                # Determine y axis orientation: True if y decreases from top->bottom
+                try:
+                    self.y_descending = bool(y[0] > y[-1])
+                except Exception:
+                    self.y_descending = True
 
                 # Build zone index raster once
                 self._build_zone_index_raster(x, y, self.PIXEL_SIZE_M)
@@ -410,6 +423,18 @@ class NYSNetCDFToDGGSConverterAggregated:
                 for idx_code, (ipcc_code, var_list) in enumerate(groups.items(), start=1):
                     mass_per_pixel = self._compute_mass_per_pixel_for_ipcc(ds, var_list)
                     values = self._sum_pixels_to_cells(mass_per_pixel)
+                    # Conserve totals per IPCC code
+                    src_total = float(np.sum(mass_per_pixel)) if mass_per_pixel is not None else 0.0
+                    assigned_total = float(np.sum(values)) if values is not None else 0.0
+                    if src_total > 0.0:
+                        loss_frac = 1.0 - (assigned_total / src_total) if assigned_total > 0.0 else 1.0
+                        self.log_message(
+                            f"      {ipcc_code}: assigned/src = {assigned_total:.6f}/{src_total:.6f} (loss {loss_frac*100:.3f}%) before scaling"
+                        )
+                        if assigned_total > 0.0 and abs(loss_frac) > 1e-12:
+                            scale = src_total / assigned_total
+                            values = values * scale
+                            self.log_message(f"      Applied conservation scaling: {scale:.12f}")
 
                     result_df[ipcc_code] = values
 
@@ -422,15 +447,15 @@ class NYSNetCDFToDGGSConverterAggregated:
                     )
                 ds.close()
 
-                # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
+                # Step 1: Set small values (< threshold Mg) to zero
                 value_cols = [c for c in result_df.columns if c != 'dggsID']
-                self.log_message(f"  Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+                self.log_message(f"  Step 1: Filtering small values (< {self.SMALL_VALUE_THRESHOLD} Mg)")
                 small_values_before = 0
                 for col in value_cols:
-                    small_mask = result_df[col] < 1e-6
+                    small_mask = result_df[col] < self.SMALL_VALUE_THRESHOLD
                     small_count = small_mask.sum()
                     small_values_before += small_count
-                    result_df[col] = result_df[col].where(result_df[col] >= 1e-6, 0.0)
+                    result_df[col] = result_df[col].where(result_df[col] >= self.SMALL_VALUE_THRESHOLD, 0.0)
                 self.log_message(f"    Set {small_values_before} small values to zero across all columns")
                 
                 # Step 2: Remove rows with all zeros across IPCC columns
@@ -465,14 +490,14 @@ class NYSNetCDFToDGGSConverterAggregated:
         
         # Get value columns for processing
         
-        # Step 1: Set small values (< 1e-6 Mg = 1g) to zero
-        self.log_message(f"Final processing - Step 1: Filtering small values (< 1e-6 Mg = 1g)")
+        # Step 1: Set small values (< threshold Mg) to zero
+        self.log_message(f"Final processing - Step 1: Filtering small values (< {self.SMALL_VALUE_THRESHOLD} Mg)")
         small_values_before = 0
         for col in value_cols:
-            small_mask = combined[col] < 1e-6
+            small_mask = combined[col] < self.SMALL_VALUE_THRESHOLD
             small_count = small_mask.sum()
             small_values_before += small_count
-            combined[col] = combined[col].where(combined[col] >= 1e-6, 0.0)
+            combined[col] = combined[col].where(combined[col] >= self.SMALL_VALUE_THRESHOLD, 0.0)
         self.log_message(f"  Set {small_values_before} small values to zero across all columns")
         
         # Step 2: Remove rows with all zeros

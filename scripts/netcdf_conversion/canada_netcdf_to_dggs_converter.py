@@ -203,23 +203,20 @@ class CanadaNetCDFToDGGSConverterAggregated:
         aggregated_data = {}
         for ipcc_code, var_list in ipcc_groups.items():
             self.log_message(f"  Aggregating {ipcc_code}: {var_list}")
-            
-            if len(var_list) == 1:
-                # Single variable - just use it directly
-                aggregated_data[ipcc_code] = nc_data[var_list[0]].values
-                self.log_message(f"    Single variable: {var_list[0]}")
-            else:
-                # Multiple variables - sum them up
-                self.log_message(f"    Summing {len(var_list)} variables...")
-                # Start with the first variable
-                aggregated_array = nc_data[var_list[0]].values
-                
-                # Add the rest
-                for var in var_list[1:]:
-                    aggregated_array = aggregated_array + nc_data[var].values
-                
-                aggregated_data[ipcc_code] = aggregated_array
-                self.log_message(f"    Aggregated into single array: {aggregated_array.shape}")
+            # Build a clean stack with NaN/inf -> 0 and negatives clipped to 0; handle time dims
+            clean_stack = []
+            for var in var_list:
+                arr = nc_data[var].values
+                if arr.ndim == 3:  # (time, lat, lon)
+                    arr = arr[0, :, :]
+                arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+                arr = np.clip(arr, 0, None)
+                clean_stack.append(arr)
+            if not clean_stack:
+                continue
+            aggregated_array = np.sum(clean_stack, axis=0)
+            aggregated_data[ipcc_code] = aggregated_array
+            self.log_message(f"    Aggregated into single array: {aggregated_array.shape}")
         
         return aggregated_data
 
@@ -266,7 +263,9 @@ class CanadaNetCDFToDGGSConverterAggregated:
         for ipcc_code, aggregated_array in aggregated_data.items():
             self.log_message(f"  Processing aggregated IPCC2006 code: {ipcc_code}")
             
-            # Reverse latitude order to match raster format
+            # Handle multi-dimensional data (time) then reverse latitude order
+            if aggregated_array.ndim == 3:
+                aggregated_array = aggregated_array[0, :, :]
             aggregated_array = aggregated_array[::-1, :]
             
             # Convert units: Mg/year/km² to Mg/year/m²
@@ -276,8 +275,14 @@ class CanadaNetCDFToDGGSConverterAggregated:
             
             # Calculate total emissions per pixel if area is available
             if area is not None:
+                # Align area orientation with reversed latitude
+                area_aligned = area
+                if area_aligned.ndim == 3:
+                    area_aligned = area_aligned[0, :, :]
+                if area_aligned.shape == aggregated_array_mg_per_m2.shape:
+                    area_aligned = area_aligned[::-1, :]
                 # area is in m², so multiply to get total emissions per pixel in Mg/year
-                total_emission_per_pixel = aggregated_array_mg_per_m2 * area
+                total_emission_per_pixel = aggregated_array_mg_per_m2 * area_aligned
             else:
                 # If no area data, assume uniform area
                 total_emission_per_pixel = aggregated_array_mg_per_m2
@@ -286,7 +291,9 @@ class CanadaNetCDFToDGGSConverterAggregated:
             # total_emission_per_pixel is now in Mg/year
             
             # Handle missing data
-            total_emission_per_pixel = np.nan_to_num(total_emission_per_pixel, nan=0.0)
+            total_emission_per_pixel = np.nan_to_num(total_emission_per_pixel, nan=0.0, posinf=0.0, neginf=0.0)
+            # Clip negatives to zero
+            total_emission_per_pixel = np.clip(total_emission_per_pixel, 0, None)
             
             # Note: total_emission_per_pixel is now in Mg/year (Megagrams per year)
             raster_data[ipcc_code] = {

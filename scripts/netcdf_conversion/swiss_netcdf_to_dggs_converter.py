@@ -131,13 +131,17 @@ class SwissNetCDFToDGGSConverterAggregated:
 
         aggregated = {}
         for ipcc_code, var_list in ipcc_groups.items():
-            if len(var_list) == 1:
-                aggregated[ipcc_code] = nc_data[var_list[0]].values
-            else:
-                arr = nc_data[var_list[0]].values
-                for v in var_list[1:]:
-                    arr = arr + nc_data[v].values
-                aggregated[ipcc_code] = arr
+            clean_stack = []
+            for v in var_list:
+                arr = nc_data[v].values
+                if arr.ndim == 3:
+                    arr = arr[0, :, :]
+                arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+                arr = np.clip(arr, 0, None)
+                clean_stack.append(arr)
+            if not clean_stack:
+                continue
+            aggregated[ipcc_code] = np.sum(clean_stack, axis=0)
         return aggregated
 
     def convert_aggregated_to_raster(self, netcdf_path):

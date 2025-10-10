@@ -160,7 +160,7 @@ class ChinaTIFFToDGGSConverter:
             transform=transform,
             fill=0,
             dtype='int32',
-            all_touched=False
+            all_touched=True
         )
         self._zone_index_cache[key] = label_raster
         self.log_message("  Zone index raster created and cached")

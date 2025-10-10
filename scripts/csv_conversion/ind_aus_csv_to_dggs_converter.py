@@ -133,7 +133,7 @@ class IndAusCSVToDGGSConverter:
             transform=transform,
             fill=0,
             dtype='int32',
-            all_touched=False,
+            all_touched=True,
         )
         return label_raster
 

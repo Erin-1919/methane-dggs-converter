@@ -71,9 +71,14 @@ def _create_temp_raster_from_netcdf(ds):
         raise ValueError(f"Unexpected emissions dimensions: {emissions.shape}")
     lat = ds['lat'].values
     lon = ds['lon'].values
-    # Orient north-up
-    lat = lat[::-1]
-    emissions = emissions[::-1, :]
+    # Orient north-up consistently; if lat is ascending (south->north), reverse both lat and data
+    try:
+        need_flip = len(lat) > 1 and float(lat[0]) < float(lat[-1])
+    except Exception:
+        need_flip = True
+    if need_flip:
+        lat = lat[::-1]
+        emissions = emissions[::-1, :]
     # Derive resolution from lon/lat spacing
     if len(lon) > 1:
         dx = float(abs(lon[1] - lon[0]))

@@ -55,6 +55,19 @@ def _setup_logger():
     logger.propagate = False
     
     return logger, log_path
+def _compute_cell_area_m2(lat_centers: np.ndarray, lon_centers: np.ndarray, cell_deg: float = 0.1) -> np.ndarray:
+    """Compute approximate cell areas (m^2) on a sphere for a regular lon/lat grid.
+    Uses spherical Earth formula consistent with small-area approximation.
+    Returns an array of shape (lat, lon).
+    """
+    R = 6371000.0  # meters
+    half = cell_deg / 2.0
+    phi1 = np.deg2rad(lat_centers - half)
+    phi2 = np.deg2rad(lat_centers + half)
+    dlon = np.deg2rad(cell_deg)
+    band_area_m2 = (R * R) * dlon * (np.sin(phi2) - np.sin(phi1))  # shape (lat,)
+    return np.repeat(band_area_m2[:, None], len(lon_centers), axis=1)
+
 
 
 def _bounds_intersect(b1, b2):
@@ -386,21 +399,31 @@ class GlobalGFEINetCDFToDGGSConverterOptimized:
         return parts[-1] if parts else filename
 
     def _get_area_array(self, lat, lon, ds):
+        # Prefer dataset-provided area
         if 'area' in ds.variables:
             area = ds['area'].values
             if area.ndim == 3:
                 area = area[0, :, :]
             elif area.ndim != 2:
                 raise ValueError(f"Unexpected area dimensions: {area.shape}")
-            return area
+            return area  # assumed in m^2
+        # Fallback to cached area if dimensions match; align latitude orientation
         if self.area_cache is not None:
             if self.area_cache.shape == (lat.shape[0], lon.shape[0]):
-                return self.area_cache
+                area = self.area_cache
+                # Assume cached area stored with ascending latitude; flip if target lat is descending
+                try:
+                    if len(lat) > 1 and float(lat[0]) > float(lat[1]):
+                        area = area[::-1, :]
+                except Exception:
+                    pass
+                return area
             else:
                 raise ValueError(
                     f"Cached area shape {self.area_cache.shape} does not match data shape {(lat.shape[0], lon.shape[0])}"
                 )
-        raise ValueError("Area is required but not available in dataset and no cached area found")
+        # As last resort, compute area from lat/lon spacing (m^2)
+        return _compute_cell_area_m2(lat_centers=lat, lon_centers=lon, cell_deg=(abs(lon[1]-lon[0]) if len(lon)>1 else 0.1))
 
     def convert_single_to_raster(self, netcdf_path, variable_name):
         self._log(f"Processing NetCDF: {os.path.basename(netcdf_path)} for variable {variable_name}")
