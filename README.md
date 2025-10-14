@@ -1,6 +1,13 @@
 # Methane Grid Calculation with DGGS
 
-This project converts various methane emission datasets (NetCDF, GeoTIFF, CSV) to Discrete Global Grid System (DGGS) format using pre-calculated country-specific DGGS grids. The project supports multiple data sources and formats with standardized IPCC2006 code aggregation.
+A comprehensive data processing pipeline that standardizes global, national, and regional methane emission inventories into the rHEALPix DGGS. This project addresses the challenge of harmonizing diverse methane emission gridded inventories from multiple sources, temporal periods, spatial resolutions, and reporting units into a unified, spatially consistent framework for climate research and policy analysis.
+
+- **Spatial consistency**: Equal-area grid cells for accurate spatial analysis
+- **Unit standardization**: All outputs in Mg a⁻¹ (megagrams per year)
+- **IPCC2006 sector code**: Standardized emission categorization
+- **Scalable processing**: Optimized for large-scale datasets with HPC support
+- **Quality assurance**: Area-weighted distribution preserving total emissions
+
 
 ## Project Structure
 
@@ -11,11 +18,9 @@ Scripts for creating and preparing DGGS grids for all countries:
 
 1. **`create_global_country_geojson.py`**
    - Creates global country boundaries from pygadm
-   - Generates: `data/geojson/global_countries.geojson`
 
 2. **`simplify_global_countries.py`**
    - Simplifies country geometries to reduce file size
-   - Generates: `data/geojson/global_countries_simplify.geojson`
 
 3. **`convert_country_geojson_to_dggs.py`**
    - Converts country boundaries to DGGS grid cells
@@ -37,7 +42,7 @@ Scripts for converting NetCDF data to DGGS using pre-calculated grids:
    - Converts Canada NetCDF methane data to DGGS
    - Uses IPCC2006 code aggregation
    - Handles 2018 Canada anthropogenic methane emissions
-   - Units: molecules CH₄ cm⁻² s⁻¹ → Mg/year
+   - Units: molecules CH₄ cm⁻² s⁻¹ → Mg a⁻¹
 
 7. **`china_SACMS_netcdf_to_dggs_converter.py`**
    - Converts China SACMS NetCDF data to DGGS
@@ -119,6 +124,26 @@ Utility scripts for data processing, combining, and cleanup:
     - Merges country and offshore DGGS grids
     - Handles duplicate zoneID removal
 
+### 📁 `scripts/analysis/`
+Analysis scripts for post-processing and summarizing DGGS-converted datasets:
+
+20. **`create_dggs_coverage_geojsons.py`**
+    - Creates dissolved and simplified DGGS coverage geometries for each inventory CSV
+    - Extracts unique DGGS cell IDs from CSV files and filters corresponding geometries
+    - Supports parallel processing for large datasets with automatic CPU detection
+
+21. **`compute_sectoral_breakdown.py`**
+    - Computes sectoral methane emission totals for selected national datasets
+    - Aggregates emissions by four broad IPCC sectors (Energy, Industrial Processes, Agriculture/Forestry, Waste)
+    - Processes US, Canada, Mexico, China, and Switzerland datasets
+    - Generates temporal breakdowns for China (1990-2020) and US (2012-2018)
+
+22. **`generate_dggs_dataset_summary.py`**
+    - Generates descriptive summary table for DGGS-converted methane inventory CSVs
+    - Computes dataset metadata: number of DGGS cells, resolution, year range, IPCC categories
+    - Uses configuration mappings for resolution and year range information
+    - Optimized for large files with chunked reading
+
 ### 📁 `SLURM_job_scripts/`
 HPC job scripts for running conversions on cluster systems:
 
@@ -135,20 +160,20 @@ HPC job scripts for running conversions on cluster systems:
 4. Convert offshore areas to DGGS (`convert_offshore_to_dggs.py`)
 5. Merge offshore grids and country grids (`merge_country_offshore_dggs_geometries.py`)
 6. Combine all grids to one single GeoJSON (`combine_geojson_folder.py`)
-7. Create local grids as parquet files (`convert_single_geojson_to_dggs.py`)
+7. Create local grids as needed (`convert_single_geojson_to_dggs.py`)
 
 ### Phase 2: Data Conversion to DGGS
-All conversion processes output standardized CSV files with DGGS cell values in **Mg/year** units:
+All conversion processes output standardized CSV files with DGGS cell values in **Mg a⁻¹** units:
 
 #### NetCDF Conversion
 **Input Units**: Various (molecules CH₄ cm⁻² s⁻¹, Mg km⁻² a⁻¹, kg m⁻² s⁻¹, kg/h, g m⁻² yr⁻¹)
-**Output Units**: Mg/year (Megagrams per year)
+**Output Units**: Mg a⁻¹ (Megagrams per year)
 
 1. Load NetCDF data and extract variables
 2. Apply IPCC2006 code aggregation using lookup tables
 3. Convert NetCDF data to raster format
 4. Calculate pixel areas from coordinate reference system
-5. Convert input units to Mg/year using appropriate formulas:
+5. Convert input units to Mg a⁻¹ using appropriate formulas:
    - **Flux units** (molecules CH₄ cm⁻² s⁻¹): `mass_Mg = (flux × area × seconds_per_year / AVOGADRO) × M_CH4 × (1e-6)`
    - **Emission rate units** (Mg km⁻² a⁻¹): `mass_Mg = emission_rate × area_km2`
    - **Mass flux units** (kg m⁻² s⁻¹): `mass_Mg = flux × pixel_area_m2 × seconds_per_year / 1000`
@@ -160,7 +185,7 @@ All conversion processes output standardized CSV files with DGGS cell values in 
 
 #### GeoTIFF Conversion
 **Input Units**: Mg km⁻² a⁻¹ (megagrams per square kilometer per year)
-**Output Units**: Mg/year (Megagrams per year)
+**Output Units**: Mg a⁻¹ (Megagrams per year)
 
 1. Load GeoTIFF raster data
 2. Map variable names to IPCC2006 codes using lookup tables
@@ -173,7 +198,7 @@ All conversion processes output standardized CSV files with DGGS cell values in 
 
 #### CSV Point Data Conversion
 **Input Units**: ton/year (tons per year)
-**Output Units**: Mg/year (Megagrams per year)
+**Output Units**: Mg a⁻¹ (Megagrams per year)
 
 1. Load CSV point data (lat, lon, value)
 2. Create regular grid raster from point data in EPSG:4326
@@ -235,7 +260,7 @@ The project processes various gridded methane emission inventories from multiple
 - **Multi-source support**: Handles various data formats and units (NetCDF, GeoTIFF, CSV)
 - **Parallel processing**: Optimized for large-scale data processing with multiprocessing
 - **Resume capability**: Can restart from intermediate results
-- **Unit conversion**: Automatic conversion between different emission units and final output unit as Mg/year
+- **Unit conversion**: Automatic conversion between different emission units and final output unit as Mg a⁻¹
 - **HPC support**: SLURM job scripts for cluster computing
 - **Comprehensive logging**: Detailed processing logs for debugging and monitoring
 
@@ -260,7 +285,7 @@ python scripts/utilities/merge_country_offshore_dggs_geometries.py
 # Combine all grids to one single geojson
 python scripts/utilities/combine_geojson_folder.py
 
-# Create local grids (as parquet)
+# Create local grids
 python scripts/dggs_grid_creation/convert_single_geojson_to_dggs
 ```
 
@@ -303,13 +328,6 @@ python scripts/csv_conversion/ind_aus_csv_to_dggs_converter.py
 sbatch SLURM_job_scripts/run_canada_netcdf_conversion.sh
 sbatch SLURM_job_scripts/run_edgar_netcdf_conversion.sh
 sbatch SLURM_job_scripts/run_china_tiff_conversion.sh
-
-# Submit data combination jobs
-sbatch SLURM_job_scripts/combine_edgar_csv.sh
-sbatch SLURM_job_scripts/combine_geojson.sh
-
-# Submit grid creation jobs
-sbatch SLURM_job_scripts/create_global_dggs_geom.sh
 ```
 
 
