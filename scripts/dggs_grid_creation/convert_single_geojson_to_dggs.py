@@ -20,17 +20,29 @@ import subprocess
 from typing import Generator, Iterable, List, Tuple, Optional, Dict, Any
 
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import shape as shapely_shape
 from shapely.prepared import prep as shapely_prep
+from shapely import wkt as shapely_wkt
+import concurrent.futures
+import shutil
+import pyarrow as pa
+import pyarrow.parquet as pq
+from shapely.errors import GEOSException
+try:
+    # Shapely 2.x
+    from shapely.validation import make_valid as shapely_make_valid
+except Exception:
+    shapely_make_valid = None
 
 
 GRID_TYPE_DEFAULT = "rhealpix"
-LEVEL_DEFAULT = 10
-INPUT_FILE_DEFAULT = os.path.join("data", "geojson", "newyorkstate.geojson")
+LEVEL_DEFAULT = 7
+INPUT_FILE_DEFAULT = os.path.join("data", "geojson", "europe.geojson")
 OUTPUT_DIR_DEFAULT = os.path.join("data", "geojson", "regional_grid")
 
 
-def run_dggs_grid(grid: str, level: int, bbox: str) -> Dict[str, Any]:
+def run_dggs_grid(grid: str, level: int, bbox: str, timeout_sec: int = 600, retries: int = 2) -> Dict[str, Any]:
     """Run the DGGS CLI to generate a grid for the given bbox and return GeoJSON as dict.
 
     Note: We still parse tile output as a whole JSON document. Keep tiles small
@@ -38,16 +50,30 @@ def run_dggs_grid(grid: str, level: int, bbox: str) -> Dict[str, Any]:
     to streaming parse for even lower memory usage.
     """
     cmd = ["dgg", grid, "grid", str(level), "-bbox", bbox]
-    print("Running DGGS CLI:", " ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"DGGS command failed (exit {result.returncode}): {result.stderr}")
-
-    output = result.stdout.strip()
-    if not output:
-        raise RuntimeError("DGGS command returned empty output")
-
-    return json.loads(output)
+    attempt = 0
+    last_err = None
+    while attempt <= max(0, retries):
+        try:
+            print("Running DGGS CLI:", " ".join(cmd), f"(attempt {attempt+1}/{max(1, retries+1)})", flush=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_sec)
+            if result.returncode != 0:
+                last_err = RuntimeError(f"DGGS command failed (exit {result.returncode}): {result.stderr}")
+                attempt += 1
+                continue
+            output = result.stdout.strip()
+            if not output:
+                last_err = RuntimeError("DGGS command returned empty output")
+                attempt += 1
+                continue
+            return json.loads(output)
+        except subprocess.TimeoutExpired as te:
+            last_err = te
+            print(f"DGGS CLI timed out after {timeout_sec}s for bbox {bbox}; retrying...")
+            attempt += 1
+        except Exception as e:
+            last_err = e
+            attempt += 1
+    raise last_err if last_err is not None else RuntimeError("DGGS command failed for unknown reasons")
 
 
 def generate_tiles(minx: float, miny: float, maxx: float, maxy: float, tile_deg: float) -> List[Tuple[float, float, float, float]]:
@@ -73,6 +99,97 @@ def generate_tiles(minx: float, miny: float, maxx: float, maxy: float, tile_deg:
             tx_max = min(tx_min + tile_deg, maxx_c)
             tiles.append((tx_min, ty_min, tx_max, ty_max))
     return tiles
+
+
+def process_tile_to_rows(grid: str, level: int, tx_min: float, ty_min: float, tx_max: float, ty_max: float, region_wkt: str, region_name: str, timeout_sec: int, retries: int) -> List[Dict[str, Any]]:
+    """Process a single tile: run DGGS, filter by intersection, and return rows for Parquet.
+
+    The region geometry is passed as WKT to allow safe cross-process serialization.
+    """
+    bbox_str = f"{ty_min},{tx_min},{ty_max},{tx_max}"
+    try:
+        grid_geojson = run_dggs_grid(grid, level, bbox_str, timeout_sec=timeout_sec, retries=retries)
+    except Exception as e:
+        print(f"Warning: skipping tile bbox {bbox_str} due to DGGS error: {e}")
+        return []
+    region_geom = shapely_wkt.loads(region_wkt)
+    prepared_region = shapely_prep(region_geom)
+    rows: List[Dict[str, Any]] = []
+    features = grid_geojson.get("features", [])
+    for idx, feat in enumerate(features):
+        geom = feat.get("geometry")
+        if not geom:
+            continue
+        shp = shapely_shape(geom)
+        if not prepared_region.intersects(shp):
+            continue
+        props = feat.get("properties", {}) or {}
+        zone_id = props.get("zoneID")
+        if zone_id is None:
+            zone_id = props.get("id") or f"cell_{idx}"
+        rows.append({
+            "zoneID": zone_id,
+            "region": region_name,
+            "geometry": shp,
+        })
+    return rows
+
+
+def process_tile_to_parquet(grid: str, level: int, tx_min: float, ty_min: float, tx_max: float, ty_max: float, region_wkt: str, region_name: str, dataset_dir: str, tile_idx: int, timeout_sec: int, retries: int) -> Tuple[str, int]:
+    """Worker function: run DGGS, filter by intersection, write a parquet part, return (path, rows)."""
+    os.makedirs(dataset_dir, exist_ok=True)
+    bbox_str = f"{ty_min},{tx_min},{ty_max},{tx_max}"
+    try:
+        grid_geojson = run_dggs_grid(grid, level, bbox_str, timeout_sec=timeout_sec, retries=retries)
+    except Exception as e:
+        print(f"Warning: skipping tile #{tile_idx} bbox {bbox_str} due to DGGS error: {e}")
+        part_path = os.path.join(dataset_dir, f"part-{tile_idx:05d}.parquet")
+        gdf_empty = gpd.GeoDataFrame({"zoneID": [], "region": [], "geometry": []}, geometry="geometry", crs="EPSG:4326")
+        gdf_empty.to_parquet(part_path, index=False)
+        return part_path, 0
+    region_geom = shapely_wkt.loads(region_wkt)
+    prepared_region = shapely_prep(region_geom)
+    rows: List[Dict[str, Any]] = []
+    features = grid_geojson.get("features", [])
+    for idx, feat in enumerate(features):
+        geom = feat.get("geometry")
+        if not geom:
+            continue
+        shp = shapely_shape(geom)
+        if not prepared_region.intersects(shp):
+            continue
+        props = feat.get("properties", {}) or {}
+        zone_id = props.get("zoneID")
+        if zone_id is None:
+            zone_id = props.get("id") or f"cell_{idx}"
+        rows.append({
+            "zoneID": zone_id,
+            "region": region_name,
+            "geometry": shp,
+        })
+    if not rows:
+        part_path = os.path.join(dataset_dir, f"part-{tile_idx:05d}.parquet")
+        # Write empty table with explicit string dtypes to avoid schema drift
+        gdf_empty = gpd.GeoDataFrame(
+            {
+                "zoneID": pd.Series([], dtype="string"),
+                "region": pd.Series([], dtype="string"),
+            },
+            geometry=gpd.GeoSeries([], crs="EPSG:4326"),
+            crs="EPSG:4326",
+        )
+        gdf_empty.to_parquet(part_path, index=False)
+        return part_path, 0
+    gdf = gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
+    # Enforce stable types
+    if "zoneID" in gdf.columns:
+        gdf["zoneID"] = gdf["zoneID"].astype("string")
+        gdf = gdf.drop_duplicates(subset=["zoneID"])  # within-tile dedup
+    if "region" in gdf.columns:
+        gdf["region"] = gdf["region"].astype("string")
+    part_path = os.path.join(dataset_dir, f"part-{tile_idx:05d}.parquet")
+    gdf.to_parquet(part_path, index=False)
+    return part_path, len(gdf)
 
 
 class GeoJSONLWriter:
@@ -123,15 +240,50 @@ class ParquetPartitionWriter:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         self.part_idx = 0
         self.all_rows = []
+        # These will be configured by caller
+        self.dataset_mode: bool = False
+        self.dedup_enabled: bool = False
+        self.seen_zone_ids: Optional[set] = None
+        self.dataset_dir: Optional[str] = None
 
     def write_batch(self, rows: List[Dict[str, Any]]) -> None:
         if not rows:
             return
-        self.all_rows.extend(rows)
+        if self.dataset_mode:
+            if self.dataset_dir is None:
+                base, _ = os.path.splitext(self.output_path)
+                self.dataset_dir = base + "_dataset"
+                os.makedirs(self.dataset_dir, exist_ok=True)
+            # Deduplicate across parts if enabled
+            if self.dedup_enabled and self.seen_zone_ids is not None:
+                filtered: List[Dict[str, Any]] = []
+                for r in rows:
+                    zid = r.get("zoneID")
+                    if zid is None:
+                        filtered.append(r)
+                    elif zid not in self.seen_zone_ids:
+                        self.seen_zone_ids.add(zid)
+                        filtered.append(r)
+                rows = filtered
+                if not rows:
+                    return
+            gdf = gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
+            if "zoneID" in gdf.columns and not self.dedup_enabled:
+                gdf = gdf.drop_duplicates(subset=["zoneID"])  # best-effort within-batch
+            part_path = os.path.join(self.dataset_dir, f"part-{self.part_idx:05d}.parquet")
+            gdf.to_parquet(part_path, index=False)
+            self.part_idx += 1
+        else:
+            self.all_rows.extend(rows)
 
     def close(self) -> None:
+        if self.dataset_mode:
+            # Nothing to do; parts are already written
+            return
         if self.all_rows:
             gdf = gpd.GeoDataFrame(self.all_rows, geometry="geometry", crs="EPSG:4326")
+            if "zoneID" in gdf.columns:
+                gdf = gdf.drop_duplicates(subset=["zoneID"])  # ensure unique cells
             gdf.to_parquet(self.output_path, index=False)
 
 
@@ -171,6 +323,10 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=10000, help="Number of features per write batch")
     parser.add_argument("--dedup", action="store_true", help="De-duplicate cells across tiles by zoneID (recommended)")
     parser.add_argument("--max-tiles", type=int, default=None, help="Process at most N tiles (for testing)")
+    parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers for tiles (Parquet only)")
+    parser.add_argument("--parquet-dataset", action="store_true", help="Write Parquet as multiple part files to reduce memory usage")
+    parser.add_argument("--timeout-sec", type=int, default=600, help="Timeout in seconds for each DGGS CLI call")
+    parser.add_argument("--retries", type=int, default=2, help="Number of retries for failed/timeout DGGS calls")
 
     args = parser.parse_args()
 
@@ -190,8 +346,38 @@ def main() -> int:
     else:
         region_gdf = region_gdf.to_crs("EPSG:4326")
 
-    # Union and prepare geometry for fast spatial predicates
-    region_geom = region_gdf.geometry.union_all()
+    # Clean invalid geometries to avoid TopologyException during union
+    def _clean_geom(geom):
+        if geom is None or geom.is_empty:
+            return None
+        try:
+            if not geom.is_valid:
+                if shapely_make_valid is not None:
+                    geom = shapely_make_valid(geom)
+                else:
+                    geom = geom.buffer(0)
+        except Exception:
+            try:
+                geom = geom.buffer(0)
+            except Exception:
+                return None
+        return geom if (geom is not None and not geom.is_empty) else None
+
+    region_gdf = region_gdf[region_gdf.geometry.notnull()]
+    region_gdf["geometry"] = region_gdf.geometry.apply(_clean_geom)
+    region_gdf = region_gdf[region_gdf.geometry.notnull() & ~region_gdf.geometry.is_empty]
+
+    # Union and prepare geometry for fast spatial predicates, with robust fallback
+    try:
+        region_geom = region_gdf.geometry.union_all()
+    except (GEOSException, Exception):
+        region_geom = gpd.GeoSeries(region_gdf.geometry.values, crs="EPSG:4326").unary_union
+    # Ensure union result is valid
+    try:
+        if not region_geom.is_valid:
+            region_geom = shapely_make_valid(region_geom) if shapely_make_valid is not None else region_geom.buffer(0)
+    except Exception:
+        pass
     prepared_region = shapely_prep(region_geom)
 
     # Determine tiles
@@ -215,7 +401,11 @@ def main() -> int:
     if args.out_format == "parquet":
         out_path = os.path.join(args.output_dir, f"{region_name}_grid_res{args.level}.parquet")
         writer_parquet = ParquetPartitionWriter(out_path, region_name, args.level)
-        print(f"Writing Parquet file to: {out_path}")
+        # Attach dataset/dedup configuration dynamically
+        writer_parquet.dataset_mode = bool(args.parquet_dataset)
+        writer_parquet.dedup_enabled = bool(args.dedup)
+        writer_parquet.seen_zone_ids = set() if writer_parquet.dataset_mode and writer_parquet.dedup_enabled else None
+        print(f"Writing Parquet file to: {out_path} ({'dataset mode' if writer_parquet.dataset_mode else 'single file'})")
     elif args.out_format in ("geojsonl", "geojsonl.gz"):
         ext = ".geojsonl.gz" if args.out_format.endswith(".gz") else ".geojsonl"
         out_path = os.path.join(args.output_dir, f"{region_name}_res{args.level}{ext}")
@@ -232,41 +422,79 @@ def main() -> int:
     batch_rows: List[Dict[str, Any]] = []  # for parquet
     batch_feats: List[Dict[str, Any]] = []  # for geojson/geojsonl
 
-    for tile_idx, (tx_min, ty_min, tx_max, ty_max) in enumerate(tiles):
-        # DGGS bbox expects south,west,north,east (lat_min, lon_min, lat_max, lon_max)
-        bbox_str = f"{ty_min},{tx_min},{ty_max},{tx_max}"
-        print(f"Tile {tile_idx+1}/{num_tiles}: bbox (lon/lat) {tx_min:.4f},{ty_min:.4f} to {tx_max:.4f},{ty_max:.4f}")
+    workers = args.workers if args.workers and args.workers > 0 else None
+    if writer_parquet is not None and writer_parquet.dataset_mode and workers and workers > 1:
+        print(f"Parallel tile processing enabled with {workers} workers (direct part writes)", flush=True)
+        # Ensure dataset dir name <region>_grid_res<level>_dataset
+        base, _ = os.path.splitext(writer_parquet.output_path)
+        dataset_dir = base + "_dataset"
+        os.makedirs(dataset_dir, exist_ok=True)
+        region_wkt = region_geom.wkt
+        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
+            futures_list = []
+            for tile_idx, (tx_min, ty_min, tx_max, ty_max) in enumerate(tiles):
+                print(f"Tile {tile_idx+1}/{num_tiles}: bbox (lon/lat) {tx_min:.4f},{ty_min:.4f} to {tx_max:.4f},{ty_max:.4f}", flush=True)
+                futures_list.append(executor.submit(
+                    process_tile_to_parquet,
+                    args.grid,
+                    args.level,
+                    tx_min,
+                    ty_min,
+                    tx_max,
+                    ty_max,
+                    region_wkt,
+                    region_name,
+                    dataset_dir,
+                    tile_idx,
+                    int(args.timeout_sec),
+                    int(args.retries),
+                ))
+            for fut in concurrent.futures.as_completed(futures_list):
+                part_path, n_rows = fut.result()
+                total_kept += n_rows
+                print(f"  wrote {os.path.basename(part_path)}; rows in part: {n_rows}; total kept: {total_kept}", flush=True)
+        # Wire the writer to point to the dataset dir we just wrote
+        writer_parquet.dataset_dir = dataset_dir
+    else:
+        for tile_idx, (tx_min, ty_min, tx_max, ty_max) in enumerate(tiles):
+            # DGGS bbox expects south,west,north,east (lat_min, lon_min, lat_max, lon_max)
+            bbox_str = f"{ty_min},{tx_min},{ty_max},{tx_max}"
+            print(f"Tile {tile_idx+1}/{num_tiles}: bbox (lon/lat) {tx_min:.4f},{ty_min:.4f} to {tx_max:.4f},{ty_max:.4f}", flush=True)
 
-        grid_geojson = run_dggs_grid(args.grid, args.level, bbox_str)
+            try:
+                grid_geojson = run_dggs_grid(args.grid, args.level, bbox_str, timeout_sec=int(args.timeout_sec), retries=int(args.retries))
+            except Exception as e:
+                print(f"Warning: skipping tile bbox {bbox_str} due to DGGS error: {e}")
+                continue
 
-        # Iterate intersecting features and write by batches
-        for feat in iter_intersecting_features(grid_geojson, prepared_region, region_name, seen_zone_ids):
-            if writer_parquet is not None:
-                props = feat.get("properties", {}) or {}
-                zone_id = props.get("zoneID")
-                batch_rows.append({
-                    "zoneID": zone_id,
-                    "region": props.get("region", region_name),
-                    "geometry": shapely_shape(feat["geometry"]),
-                })
-                if len(batch_rows) >= args.batch_size:
-                    writer_parquet.write_batch(batch_rows)
-                    total_kept += len(batch_rows)
-                    print(f"  wrote parquet batch; total kept: {total_kept}")
-                    batch_rows.clear()
-            else:
-                batch_feats.append(feat)
-                if len(batch_feats) >= args.batch_size:
-                    if writer_geojsonl is not None:
-                        writer_geojsonl.write_features(batch_feats)
-                    elif writer_geojson is not None:
-                        writer_geojson.write_features(batch_feats)
-                    total_kept += len(batch_feats)
-                    print(f"  wrote json batch; total kept: {total_kept}")
-                    batch_feats.clear()
+            # Iterate intersecting features and write by batches
+            for feat in iter_intersecting_features(grid_geojson, prepared_region, region_name, seen_zone_ids):
+                if writer_parquet is not None:
+                    props = feat.get("properties", {}) or {}
+                    zone_id = props.get("zoneID")
+                    batch_rows.append({
+                        "zoneID": zone_id,
+                        "region": props.get("region", region_name),
+                        "geometry": shapely_shape(feat["geometry"]),
+                    })
+                    if len(batch_rows) >= args.batch_size:
+                        writer_parquet.write_batch(batch_rows)
+                        total_kept += len(batch_rows)
+                        print(f"  wrote parquet batch; total kept: {total_kept}")
+                        batch_rows.clear()
+                else:
+                    batch_feats.append(feat)
+                    if len(batch_feats) >= args.batch_size:
+                        if writer_geojsonl is not None:
+                            writer_geojsonl.write_features(batch_feats)
+                        elif writer_geojson is not None:
+                            writer_geojson.write_features(batch_feats)
+                        total_kept += len(batch_feats)
+                        print(f"  wrote json batch; total kept: {total_kept}")
+                        batch_feats.clear()
 
-        # Free per-tile JSON once processed
-        grid_geojson = None  # hint for GC
+            # Free per-tile JSON once processed
+            grid_geojson = None  # hint for GC
 
     # Flush remaining
     if writer_parquet is not None and batch_rows:
@@ -284,6 +512,76 @@ def main() -> int:
     # Close writers
     if writer_parquet is not None:
         writer_parquet.close()
+        # If dataset mode, combine parts into a single Parquet and clean up
+        if getattr(writer_parquet, "dataset_mode", False) and writer_parquet.dataset_dir is not None:
+            combined_path = writer_parquet.output_path
+            part_files = sorted([
+                os.path.join(writer_parquet.dataset_dir, f)
+                for f in os.listdir(writer_parquet.dataset_dir)
+                if f.endswith(".parquet")
+            ])
+            if not part_files:
+                print("No parts to combine; dataset directory is empty")
+            else:
+                print(f"Combining {len(part_files)} part files into single Parquet: {combined_path}")
+                # Initialize writer with schema and geo metadata from first part
+                first_table = pq.read_table(part_files[0])
+                schema = first_table.schema
+                metadata = schema.metadata
+                writer = pq.ParquetWriter(combined_path, schema=schema, version="2.6", compression="snappy")
+                try:
+                    seen_ids: Optional[set] = set()
+                    for idx, p in enumerate(part_files, start=1):
+                        tbl = pq.read_table(p)
+                        # Coerce dtypes to match the first table schema to avoid schema drift
+                        target_schema = schema
+                        # Ensure zoneID/region are strings
+                        col_names = tbl.schema.names
+                        if "zoneID" in col_names and not pa.types.is_string(tbl.schema.field("zoneID").type):
+                            tbl = tbl.set_column(col_names.index("zoneID"), "zoneID", tbl.column("zoneID").cast(pa.string()))
+                        if "region" in col_names and not pa.types.is_string(tbl.schema.field("region").type):
+                            tbl = tbl.set_column(col_names.index("region"), "region", tbl.column("region").cast(pa.string()))
+                        # Align to target schema order/types where possible
+                        try:
+                            tbl = tbl.cast(target_schema)
+                        except Exception:
+                            pass
+                        # Deduplicate by zoneID across parts
+                        try:
+                            zid_col = tbl.column("zoneID")
+                        except KeyError:
+                            zid_col = None
+                        if zid_col is not None:
+                            zid_list = zid_col.to_pylist()
+                            keep_indices: List[int] = []
+                            for i, zid in enumerate(zid_list):
+                                if zid is None:
+                                    keep_indices.append(i)
+                                elif zid not in seen_ids:
+                                    seen_ids.add(zid)
+                                    keep_indices.append(i)
+                            if len(keep_indices) < tbl.num_rows:
+                                if len(keep_indices) == 0:
+                                    # Make an empty table with same schema
+                                    tbl = tbl.slice(0, 0)
+                                else:
+                                    idx_array = pa.array(keep_indices, type=pa.int64())
+                                    tbl = tbl.take(idx_array)
+                        if tbl.num_rows > 0:
+                            writer.write_table(tbl)
+                        print(f"  combined part {idx}/{len(part_files)}; rows written so far")
+                finally:
+                    writer.close()
+                # Restore geo metadata if lost (parquet writer preserves schema metadata)
+                if metadata is not None:
+                    # Re-open and set file metadata is non-trivial; skip explicit reset
+                    pass
+                # Clean up dataset directory
+                try:
+                    shutil.rmtree(writer_parquet.dataset_dir)
+                    print(f"Removed intermediate dataset directory: {writer_parquet.dataset_dir}")
+                except Exception as e:
+                    print(f"Warning: failed to remove dataset directory {writer_parquet.dataset_dir}: {e}")
     if writer_geojsonl is not None:
         writer_geojsonl.close()
     if writer_geojson is not None:

@@ -1,0 +1,563 @@
+CRT,SectorName_x,FuelName,SectorID,FuelID,SectorName_y,GNFR
+1.A.1.a,Public electricity and heat production,Biomass,1100,400,Public electricity and heat production,A
+1.A.1.a,Public electricity and heat production,Gaseous fuels,1100,300,Public electricity and heat production,A
+1.A.1.a,Public electricity and heat production,Liquid fuels,1100,200,Public electricity and heat production,A
+1.A.1.a,Public electricity and heat production,Other fossil fuels,1100,500,Public electricity and heat production,A
+1.A.1.a,Public electricity and heat production,Peat,1100,140,Public electricity and heat production,A
+1.A.1.a,Public electricity and heat production,Solid fuels,1100,100,Public electricity and heat production,A
+,,,1200,,Oil and gas refining,B
+1.A.1.b,Petroleum refining,Biomass,1210,400,Oil and gas refining (comb),B
+1.A.1.b,Petroleum refining,Gaseous fuels,1210,300,Oil and gas refining (comb),B
+1.A.1.b,Petroleum refining,Liquid fuels,1210,200,Oil and gas refining (comb),B
+1.A.1.b,Petroleum refining,Other fossil fuels,1210,500,Oil and gas refining (comb),B
+1.A.1.b,Petroleum refining,Peat,1210,140,Oil and gas refining (comb),B
+1.A.1.b,Petroleum refining,Solid fuels,1210,100,Oil and gas refining (comb),B
+,,,1220,,Oil and gas refining,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Biomass,1300,400,Manufacture of solid fuels and other energy industries,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Gaseous fuels,1300,300,Manufacture of solid fuels and other energy industries,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Liquid fuels,1300,200,Manufacture of solid fuels and other energy industries,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Other fossil fuels,1300,500,Manufacture of solid fuels and other energy industries,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Peat,1300,140,Manufacture of solid fuels and other energy industries,B
+1.A.1.c,Manufacture of solid fuels and other energy industries,Solid fuels,1300,100,Manufacture of solid fuels and other energy industries,B
+1.A.1.c.iii,Other energy industries,Biomass,1310,400,Coal mining (comb),B
+1.A.1.c.iii,Other energy industries,Gaseous fuels,1310,300,Coal mining (comb),B
+1.A.1.c.iii,Other energy industries,Liquid fuels,1310,200,Coal mining (comb),B
+1.A.1.c.iii,Other energy industries,Other fossil fuels,1310,500,Coal mining (comb),B
+1.A.1.c.iii,Other energy industries,Peat,1310,140,Coal mining (comb),B
+1.A.1.c.iii,Other energy industries,Solid fuels,1310,100,Coal mining (comb),B
+1.A.1.c.ii,Oil and gas extraction,Biomass,1320,400,Oil production (comb),B
+1.A.1.c.ii,Oil and gas extraction,Gaseous fuels,1320,300,Oil production (comb),B
+1.A.1.c.ii,Oil and gas extraction,Liquid fuels,1320,200,Oil production (comb),B
+1.A.1.c.ii,Oil and gas extraction,Other fossil fuels,1320,500,Oil production (comb),B
+1.A.1.c.ii,Oil and gas extraction,Peat,1320,140,Oil production (comb),B
+1.A.1.c.ii,Oil and gas extraction,Solid fuels,1320,100,Oil production (comb),B
+,,,1330,,Natural gas production (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Biomass,1340,400,Coke ovens (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Gaseous fuels,1340,300,Coke ovens (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Liquid fuels,1340,200,Coke ovens (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Other fossil fuels,1340,500,Coke ovens (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Peat,1340,140,Coke ovens (comb),B
+1.A.1.c.i,Manufacture of solid fuels,Solid fuels,1340,100,Coke ovens (comb),B
+,,,1400,,Fugitive emissions from solid fuels,D
+1.B.1.a,Coal mining and handling,,1410,0,Coal mining and handling,D
+1.B.1.b,Solid fuel transformation,,1420,0,Coke ovens,B
+1.B.1.c,Other (as specified in table 1.B.1),,1430,0,Other,D
+,,,1500,,Fugitive emissions from oil,D
+1.B.2.a,Oil,,1510,0,"Exploration, production, transport",D
+,,,1520,,Distribution of oil products,D
+1.B.2.b,Natural gas,,1600,0,Fugitive emissions from gas,D
+,,,1610,,Natural gas - production,D
+,,,1620,,Natural gas - high pressure distribution,D
+,,,1630,,Natural gas - low pressure distribution,D
+1.B.2.c,Venting and flaring,,1700,0,"Venting and flaring (oil, gas, combined oil and gas)",D
+,,,1800,,Other fugitive emissions,D
+1.B.2.d,Other (as specified in table 1.B.2),,1810,0,Other fugitive emissions from energy production,D
+1.C.1,Transport of CO2,,1820,0,Transport of CO2,D
+1.C.2,Injection and storage,,1830,0,Injection and storage,D
+,,,2100,,Iron and steel industry,B
+1.A.2.a,Iron and steel,Biomass,2110,400,Iron and steel industry (comb),B
+1.A.2.a,Iron and steel,Gaseous fuels,2110,300,Iron and steel industry (comb),B
+1.A.2.a,Iron and steel,Liquid fuels,2110,200,Iron and steel industry (comb),B
+1.A.2.a,Iron and steel,Other fossil fuels,2110,500,Iron and steel industry (comb),B
+1.A.2.a,Iron and steel,Peat,2110,140,Iron and steel industry (comb),B
+1.A.2.a,Iron and steel,Solid fuels,2110,100,Iron and steel industry (comb),B
+2.C.1,Iron and steel production,,2120,0,Iron and steel production,B
+2.H.3.Flaring in iron and steel production (N2O emissions),Flaring in iron and steel production (N2O emissions),,2120,0,Iron and steel production,B
+,,,2121,,"Iron and steel industry, coke ovens",B
+,,,2122,,"Iron and steel industry, sinter production",B
+,,,2123,,"Iron and steel industry, pellet production",B
+,,,2124,,"Iron and steel industry, pig iron",B
+,,,2125,,"Iron and steel industry, cast iron",B
+,,,2126,,"Iron and steel industry, basic oxygen furnace",B
+,,,2127,,"Iron and steel industry, open hearth furnace",B
+,,,2128,,"Iron and steel industry, electric arc furnace",B
+2.C.2,Ferroalloys production,,2129,0,Ferroalloys production,B
+,,,2200,,Non-ferrous metal industry,B
+1.A.2.b,Non-ferrous metals,Biomass,2210,400,Non-ferrous metals (comb),B
+1.A.2.b,Non-ferrous metals,Gaseous fuels,2210,300,Non-ferrous metals (comb),B
+1.A.2.b,Non-ferrous metals,Liquid fuels,2210,200,Non-ferrous metals (comb),B
+1.A.2.b,Non-ferrous metals,Other fossil fuels,2210,500,Non-ferrous metals (comb),B
+1.A.2.b,Non-ferrous metals,Peat,2210,140,Non-ferrous metals (comb),B
+1.A.2.b,Non-ferrous metals,Solid fuels,2210,100,Non-ferrous metals (comb),B
+2.C.3,Aluminium production,,2220,0,Aluminium production,B
+,,,2230,,Other non ferrous metal production,B
+2.C.4,Magnesium production,,2231,0,Magnesium production,B
+2.C.5,Lead production,,2232,0,Lead production,B
+2.C.6,Zinc production,,2233,0,Zinc production,B
+,,,2234,,Storage and handling of metal products,B
+2.C.7,Other (as specified in table 2(I).A-H),,2235,0,Other non ferrous metal production,B
+2.H.3.Copper production (SO2 emissions),Copper production (SO2 emissions),,2235,0,Other non ferrous metal production,B
+,,,2300,,Chemical industry,B
+1.A.2.c,Chemicals,Biomass,2310,400,Chemical industry (comb),B
+1.A.2.c,Chemicals,Gaseous fuels,2310,300,Chemical industry (comb),B
+1.A.2.c,Chemicals,Liquid fuels,2310,200,Chemical industry (comb),B
+1.A.2.c,Chemicals,Other fossil fuels,2310,500,Chemical industry (comb),B
+1.A.2.c,Chemicals,Peat,2310,140,Chemical industry (comb),B
+1.A.2.c,Chemicals,Solid fuels,2310,100,Chemical industry (comb),B
+,,,2320,,Chemical industry,B
+2.B.1,Ammonia production,,2321,0,Ammonia production,B
+2.B.2,Nitric acid production,,2322,0,Nitric acid production,B
+2.B.3,Adipic acid production,,2323,0,Adipic acid production,B
+2.B.5,Carbide production,,2324,0,Carbide production,B
+2.B.6,Titanium dioxide production,,2325,0,Titanium dioxide production,B
+2.H.3.Titanium dioxide production (NOx and SO2 emissions),Titanium dioxide production (NOx and SO2 emissions),,2325,0,Titanium dioxide production,B
+2.B.7,Soda ash production,,2326,0,Soda ash production,B
+,,,2327,,Storage and handling of chemical products,B
+2.B.10,10.  Other (as specified in table 2(I).A-H),,2328,0,Other chemical production,B
+2.B.4,Caprolactam glyoxal and glyoxylic acid production,,2328,0,Other chemical production,B
+2.B.8,Petrochemical and carbon black production,,2328,0,Other chemical production,B
+,,,2400,,Pulp and paper industry,B
+1.A.2.d,Pulp paper and print,Biomass,2410,400,Pulp and paper industry (comb),B
+1.A.2.d,Pulp paper and print,Gaseous fuels,2410,300,Pulp and paper industry (comb),B
+1.A.2.d,Pulp paper and print,Liquid fuels,2410,200,Pulp and paper industry (comb),B
+1.A.2.d,Pulp paper and print,Other fossil fuels,2410,500,Pulp and paper industry (comb),B
+1.A.2.d,Pulp paper and print,Peat,2410,140,Pulp and paper industry (comb),B
+1.A.2.d,Pulp paper and print,Solid fuels,2410,100,Pulp and paper industry (comb),B
+2.H.1,Pulp and paper,,2420,0,Pulp and paper industry,B
+2.H.3.Pulp and Paper Industry,Pulp and Paper Industry,,2420,0,Pulp and paper industry,B
+,,,2500,,Food and beverages industry,B
+1.A.2.e,Food processing beverages and tobacco,Biomass,2510,400,"Food processing, beverages and tobacco (comb)",B
+1.A.2.e,Food processing beverages and tobacco,Gaseous fuels,2510,300,"Food processing, beverages and tobacco (comb)",B
+1.A.2.e,Food processing beverages and tobacco,Liquid fuels,2510,200,"Food processing, beverages and tobacco (comb)",B
+1.A.2.e,Food processing beverages and tobacco,Other fossil fuels,2510,500,"Food processing, beverages and tobacco (comb)",B
+1.A.2.e,Food processing beverages and tobacco,Peat,2510,140,"Food processing, beverages and tobacco (comb)",B
+1.A.2.e,Food processing beverages and tobacco,Solid fuels,2510,100,"Food processing, beverages and tobacco (comb)",B
+2.H.2,Food and beverages industry,,2520,0,Food and beverages industry,B
+,,,2600,,Non-metallic mineral industry,B
+1.A.2.f,Non-metallic minerals,Biomass,2610,400,Non-metallic minerals (combustion),B
+1.A.2.f,Non-metallic minerals,Gaseous fuels,2610,300,Non-metallic minerals (combustion),B
+1.A.2.f,Non-metallic minerals,Liquid fuels,2610,200,Non-metallic minerals (combustion),B
+1.A.2.f,Non-metallic minerals,Other fossil fuels,2610,500,Non-metallic minerals (combustion),B
+1.A.2.f,Non-metallic minerals,Peat,2610,140,Non-metallic minerals (combustion),B
+1.A.2.f,Non-metallic minerals,Solid fuels,2610,100,Non-metallic minerals (combustion),B
+2.A.1,Cement production,,2620,0,Cement production,B
+,,,2630,,Other non metallic mineral production,B
+2.A.2,Lime production,,2631,0,Lime production,B
+2.A.3,Glass production,,2632,0,Glass production,B
+2.H.3.Glass (NMVOC emissions),Glass (NMVOC emissions),,2632,0,Glass production,B
+2.A.4,Other process uses of carbonates,,2633,0,Other process uses of carbonates,B
+,,,2634,,Quarrying and mining of minerals other than coal,B
+,,,2635,,Construction and demolition,B
+,,,2636,,Storage and handling of mineral products,B
+,,,2637,,Other mineral industry,B
+,,,2700,,Product use,E
+,,,2710,,Solvent use,E
+,,,2711,,Domestic solvent use including fungicides,E
+,,,2712,,Coating applications,E
+,,,2713,,Degreasing,E
+,,,2714,,Dry cleaning,E
+,,,2715,,Chemical products,E
+,,,2716,,Printing,E
+,,,2717,,Other solvent use,E
+,,,2720,,Non-solvent product use,E
+2.D.2,Paraffin wax use,,2721,0,Paraffin wax use,E
+,,,2722,,Road paving with asphalt,B
+,,,2723,,Asphalt roofing,B
+2.D.1,Lubricant use,,2724,0,Other product use,E
+2.D.3,Other,,2724,0,Other product use,E
+2.G.3,N2O from product uses,,2724,0,Other product use,E
+2.G.4,Other,,2724,0,Other product use,E
+2.H.3.Fireworks,Fireworks,,2724,0,Other product use,E
+2.H.3.Tobacco,Tobacco,,2724,0,Other product use,E
+,,,2800,,Other industry,B
+1.A.2.g.i,Manufacturing of machinery,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.i,Manufacturing of machinery,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.i,Manufacturing of machinery,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.i,Manufacturing of machinery,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.i,Manufacturing of machinery,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.i,Manufacturing of machinery,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.ii,Manufacturing of transport equipment,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.iii,Mining (excluding fuels) and quarrying,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.iv,Wood and wood products,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.v,Construction,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.vi,Textile and leather,Solid fuels,2810,100,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Biomass,2810,400,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Gaseous fuels,2810,300,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Liquid fuels,2810,200,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Other fossil fuels,2810,500,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Peat,2810,140,Other manufacturing industry (comb),B
+1.A.2.g.viii,Other (please specify),Solid fuels,2810,100,Other manufacturing industry (comb),B
+2.H,Other (as specified in tables 2(I).A-H and 2(II))(3),,2820,0,Other industrial processes,B
+2.H.3.Batteries Manufacturing,Batteries Manufacturing,,2820,0,Other industrial processes,B
+2.H.3.Blasting and shooting,Blasting and shooting,,2820,0,Other industrial processes,B
+2.H.3.Consumption of carbonates in flue gas desulphurisation,Consumption of carbonates in flue gas desulphurisation,,2820,0,Other industrial processes,B
+2.H.3.Grouped confidential data of halocarbons and SF6,Grouped confidential data of halocarbons and SF6,,2820,0,Other industrial processes,B
+2.H.3.Mineral industry CH4 emissions (fletton bricks),Mineral industry CH4 emissions (fletton bricks),,2820,0,Other industrial processes,B
+2.H.3.Mineral wool production,Mineral wool production,,2820,0,Other industrial processes,B
+2.H.3.Ore mines,Ore mines,,2820,0,Other industrial processes,B
+2.H.3.Quarrying and mining of minerals other than coal,Quarrying and mining of minerals other than coal,,2820,0,Other industrial processes,B
+2.H.3.Soda ash production (CO emissions),Soda ash production (CO emissions),,2820,0,Other industrial processes,B
+2.H.3.Vegetable Oil Production,Vegetable Oil Production,,2820,0,Other industrial processes,B
+2.H.3.Wood Processing,Wood Processing,,2820,0,Other industrial processes,B
+1.A.3.b.i,Cars,Biodiesel (fossil component),3100,250,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Biomass,3100,400,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Diesel oil,3100,250,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Fossil part of biodiesel,3100,250,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Gaseous fuels,3100,300,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Gasoline,3100,230,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Kerosene,3100,240,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Liquefied petroleum gases (LPG),3100,220,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Lubricant oil,3100,275,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Other,3100,500,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Other fossil fuels,3100,500,Passenger cars,F1-3*
+1.A.3.b.i,Cars,Other liquid fuels,3100,230,Passenger cars,F1-3*
+1.A.3.b.v,Other (please specify),Biomass,3100,400,Passenger cars,F1-3*
+1.A.3.b.v,Other (please specify),Gaseous fuels,3100,300,Passenger cars,F1-3*
+1.A.3.b.v,Other (please specify),Heating and other gasoil,3100,250,Passenger cars,F1-3*
+1.A.3.b.v,Other (please specify),Other Kerosene,3100,240,Passenger cars,F1-3*
+1.A.3.b.v,Other (please specify),Other liquid fuels,3100,230,Passenger cars,F1-3*
+1.A.3.b.v.CO2 from lubricant co-incineration in 2-stroke road vehicles,CO2 from lubricant co-incineration in 2-stroke road vehicles,lubricant used in 2-stroke mix,3100,275,Passenger cars,F1-3*
+,,,3110,,Passenger cars - highway,F1-3*
+,,,3120,,Passenger cars - urban,F1-3*
+,,,3130,,Passenger cars - rural,F1-3*
+1.A.3.b.ii,Light duty trucks,Biodiesel (fossil component),3200,250,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Biomass,3200,400,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Diesel oil,3200,250,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Fossil part of biodiesel,3200,250,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Gaseous fuels,3200,300,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Gasoline,3200,230,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Kerosene,3200,240,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Liquefied petroleum gases (LPG),3200,220,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Lubricant Oil,3200,275,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Lubricants,3200,275,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Other,3200,500,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Other fossil fuels,3200,500,Light duty vehicles,F1-3*
+1.A.3.b.ii,Light duty trucks,Other liquid fuels,3200,250,Light duty vehicles,F1-3*
+,,,3210,,Light duty vehicles - highway,F1-3*
+,,,3220,,Light duty vehicles - urban,F1-3*
+,,,3230,,Light duty vehicles - rural,F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Biodiesel (fossil component),3300,250,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Biomass,3300,400,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Diesel oil,3300,250,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Fossil part of biodiesel,3300,250,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Gaseous fuels,3300,300,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Gasoline,3300,230,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Kerosene,3300,240,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Liquefied petroleum gases (LPG),3300,220,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Lubricant Oil,3300,275,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Lubricants,3300,275,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Other,3300,500,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Other fossil fuels,3300,500,Trucks (>3.5t),F1-3*
+1.A.3.b.iii,Heavy duty trucks and buses,Other liquid fuels,3300,250,Trucks (>3.5t),F1-3*
+,,,3310,,Trucks (>3.5t) - highway,F1-3*
+,,,3320,,Trucks (>3.5t) - urban,F1-3*
+,,,3330,,Trucks (>3.5t) - rural,F1-3*
+,,,3400,,Buses,F1-3*
+,,,3410,,Buses - highway,F1-3*
+,,,3420,,Buses - urban,F1-3*
+,,,3430,,Buses - rural,F1-3*
+1.A.3.b.iv,Motorcycles,Biomass,3500,400,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Diesel oil,3500,250,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Gaseous fuels,3500,300,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Gasoline,3500,230,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Kerosene,3500,240,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Liquefied petroleum gases (LPG),3500,220,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Lubricant Oil,3500,275,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Lubricants,3500,275,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Lubricants (two-stroke engines),3500,275,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Other,3500,500,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Other fossil fuels,3500,500,Motorcycles,F1-3*
+1.A.3.b.iv,Motorcycles,Other liquid fuels,3500,230,Motorcycles,F1-3*
+,,,3510,,Motorcycles - highway,F1-3*
+,,,3520,,Motorcycles - urban,F1-3*
+,,,3530,,Motorcycles - rural,F1-3*
+,,,3600,,Mopeds,F1-3*
+,,,3610,,Mopeds - highway,F1-3*
+,,,3620,,Mopeds - urban,F1-3*
+,,,3630,,Mopeds - rural,F1-3*
+,,,3700,,Brake wear,F4
+,,,3710,,Brake wear - Passenger cars,F4
+,,,3711,,Brake wear - Passenger cars - highway,F4
+,,,3712,,Brake wear - Passenger cars - urban,F4
+,,,3713,,Brake wear - Passenger cars - rural,F4
+,,,3720,,Brake wear - LDV,F4
+,,,3721,,Brake wear - LDV - highway,F4
+,,,3722,,Brake wear - LDV - urban,F4
+,,,3723,,Brake wear - LDV - rural,F4
+,,,3730,,Brake wear - Trucks (>3.5t),F4
+,,,3731,,Brake wear - Trucks (>3.5t) - highway,F4
+,,,3732,,Brake wear - Trucks (>3.5t) - urban,F4
+,,,3733,,Brake wear - Trucks (>3.5t) - rural,F4
+,,,3740,,Brake wear - Buses,F4
+,,,3741,,Brake wear - Buses - highway,F4
+,,,3742,,Brake wear - Buses - urban,F4
+,,,3743,,Brake wear - Buses - rural,F4
+,,,3750,,Brake wear - Motorcycles,F4
+,,,3751,,Brake wear - Motorcycles - highway,F4
+,,,3752,,Brake wear - Motorcycles - urban,F4
+,,,3753,,Brake wear - Motorcycles - rural,F4
+,,,3760,,Brake wear - Mopeds,F4
+,,,3761,,Brake wear - Mopeds - highway,F4
+,,,3762,,Brake wear - Mopeds - urban,F4
+,,,3763,,Brake wear - Mopeds - rural,F4
+,,,3800,,Tyre wear,F4
+,,,3810,,Tyre wear - Passenger cars,F4
+,,,3811,,Tyre wear - Passenger cars - highway,F4
+,,,3812,,Tyre wear - Passenger cars - urban,F4
+,,,3813,,Tyre wear - Passenger cars - rural,F4
+,,,3820,,Tyre wear - LDV,F4
+,,,3821,,Tyre wear - LDV - highway,F4
+,,,3822,,Tyre wear - LDV - urban,F4
+,,,3823,,Tyre wear - LDV - rural,F4
+,,,3830,,Tyre wear - Trucks (>3.5t),F4
+,,,3831,,Tyre wear - Trucks (>3.5t) - highway,F4
+,,,3832,,Tyre wear - Trucks (>3.5t) - urban,F4
+,,,3833,,Tyre wear - Trucks (>3.5t) - rural,F4
+,,,3840,,Tyre wear - Buses,F4
+,,,3841,,Tyre wear - Buses - highway,F4
+,,,3842,,Tyre wear - Buses - urban,F4
+,,,3843,,Tyre wear - Buses - rural,F4
+,,,3850,,Tyre wear - Motorcycles,F4
+,,,3851,,Tyre wear - Motorcycles - highway,F4
+,,,3852,,Tyre wear - Motorcycles - urban,F4
+,,,3853,,Tyre wear - Motorcycles - rural,F4
+,,,3860,,Tyre wear - Mopeds,F4
+,,,3861,,Tyre wear - Mopeds - highway,F4
+,,,3862,,Tyre wear - Mopeds - urban,F4
+,,,3863,,Tyre wear - Mopeds - rural,F4
+,,,3900,,Gasoline evaporation and road wear,F4
+,,,3910,,Gasoline evaporation and road wear - Passenger cars,F4
+,,,3911,,Gasoline evaporation and road wear - Passenger cars - highway,F4
+,,,3912,,Gasoline evaporation and road wear - Passenger cars - urban,F4
+,,,3913,,Gasoline evaporation and road wear - Passenger cars - rural,F4
+,,,3920,,Gasoline evaporation and road wear - LDV,F4
+,,,3921,,Gasoline evaporation and road wear - LDV - highway,F4
+,,,3922,,Gasoline evaporation and road wear - LDV - urban,F4
+,,,3923,,Gasoline evaporation and road wear - LDV - rural,F4
+,,,3930,,Gasoline evaporation and road wear - Trucks (>3.5t),F4
+,,,3931,,Gasoline evaporation and road wear - Trucks (>3.5t) - highway,F4
+,,,3932,,Gasoline evaporation and road wear - Trucks (>3.5t) - urban,F4
+,,,3933,,Gasoline evaporation and road wear - Trucks (>3.5t) - rural,F4
+,,,3940,,Gasoline evaporation and road wear - Buses,F4
+,,,3941,,Gasoline evaporation and road wear - Buses - highway,F4
+,,,3942,,Gasoline evaporation and road wear - Buses - urban,F4
+,,,3943,,Gasoline evaporation and road wear - Buses - rural,F4
+,,,3950,,Gasoline evaporation and road wear - Motorcycles,F4
+,,,3951,,Gasoline evaporation and road wear - Motorcycles - highway,F4
+,,,3952,,Gasoline evaporation and road wear - Motorcycles - urban,F4
+,,,3953,,Gasoline evaporation and road wear - Motorcycles - rural,F4
+,,,3960,,Gasoline evaporation and road wear - Mopeds,F4
+,,,3961,,Gasoline evaporation and road wear - Mopeds - highway,F4
+,,,3962,,Gasoline evaporation and road wear - Mopeds - urban,F4
+,,,3963,,Gasoline evaporation and road wear - Mopeds - rural,F4
+1.A.3.a,Domestic aviation,Aviation gasoline,4100,230,Civil aviation - LTO,H
+1.A.3.a,Domestic aviation,Biomass,4100,400,Civil aviation - LTO,H
+1.A.3.a,Domestic aviation,Jet kerosine,4100,240,Civil aviation - LTO,H
+1.A.3.c,Railways,Biodiesel (fossil component),4200,250,Railways,I
+1.A.3.c,Railways,Biomass,4200,400,Railways,I
+1.A.3.c,Railways,Fossil part of biodiesel,4200,250,Railways,I
+1.A.3.c,Railways,Gaseous fuels,4200,300,Railways,I
+1.A.3.c,Railways,Liquid fuels,4200,250,Railways,I
+1.A.3.c,Railways,Other fossil fuels,4200,500,Railways,I
+1.A.3.c,Railways,Solid fuels,4200,100,Railways,I
+,,,4300,,Domestic navigation,G
+1.A.3.d,Domestic navigation,Biodiesel (fossil component),4310,250,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Biomass,4310,400,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Coal,4310,100,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Diesel oil,4310,250,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,fossil part of biodiesel,4310,250,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Gas/diesel oil,4310,250,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Gaseous fuels,4310,300,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Gasoline,4310,230,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Liquified natural gas,4310,300,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Lubricants,4310,275,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Other fossil fuels,4310,500,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Other liquid fuels,4310,250,"Domestic navigation, inland shipping",G
+1.A.3.d,Domestic navigation,Residual fuel oil,4310,260,"Domestic navigation, inland shipping",G
+,,,4320,,"Domestic navigation, coastal shipping",G
+1.A.4.c.iii,Fishing,Biomass,4330,400,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Gas/diesel oil,4330,250,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Gaseous fuels,4330,300,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Gasoline,4330,230,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Other fossil fuels,4330,500,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Other liquid fuels,4330,250,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.iii,Fishing,Residual fuel oil,4330,260,Small combustion - Agriculture/Forestry/Fishing - National fishing,G
+1.A.4.c.ii,Off-road vehicles and other machinery,Biodiesel (fossil component),4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Biomass,4400,400,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Diesel oil,4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,fossil part of biodiesel,4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Gaseous fuels,4400,300,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Gasoil,4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Gasoline,4400,230,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Heavy fuel oil,4400,260,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Liquefied petroleum gases (LPG),4400,220,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Marine gasoil,4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Other fossil fuels,4400,500,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Other Kerosene,4400,240,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.4.c.ii,Off-road vehicles and other machinery,Other liquid fuels,4400,250,Small combustion - Agriculture/Forestry/Fishing -  Off-road vehicles and other machinery,I
+1.A.2.g.vii,Off-road vehicles and other machinery,Biomass,4500,400,Manufacturing industry - Off-road vehicles and other machinery,I
+1.A.2.g.vii,Off-road vehicles and other machinery,Gaseous fuels,4500,300,Manufacturing industry - Off-road vehicles and other machinery,I
+1.A.2.g.vii,Off-road vehicles and other machinery,Liquid fuels,4500,250,Manufacturing industry - Off-road vehicles and other machinery,I
+1.A.2.g.vii,Off-road vehicles and other machinery,Other fossil fuels,4500,500,Manufacturing industry - Off-road vehicles and other machinery,I
+1.A.2.g.vii,Off-road vehicles and other machinery,Solid fuels,4500,100,Manufacturing industry - Off-road vehicles and other machinery,I
+,,,4600,,Other mobile combustion,I
+1.A.3.e.i,Pipeline transport,Biomass,4610,400,"Other transportation, including pipeline compressors",I
+1.A.3.e.i,Pipeline transport,Gaseous fuels,4610,300,"Other transportation, including pipeline compressors",I
+1.A.3.e.i,Pipeline transport,Liquid fuels,4610,250,"Other transportation, including pipeline compressors",I
+1.A.3.e.i,Pipeline transport,Other fossil fuels,4610,500,"Other transportation, including pipeline compressors",I
+1.A.3.e.i,Pipeline transport,Solid fuels,4610,100,"Other transportation, including pipeline compressors",I
+1.A.4.a.ii,Off-road vehicles and other machinery,Biomass,4620,400,Small combustion - Commercial/institutional - Mobile,I
+1.A.4.a.ii,Off-road vehicles and other machinery,Gaseous fuels,4620,300,Small combustion - Commercial/institutional - Mobile,I
+1.A.4.a.ii,Off-road vehicles and other machinery,Liquid fuels,4620,250,Small combustion - Commercial/institutional - Mobile,I
+1.A.4.a.ii,Off-road vehicles and other machinery,Other fossil fuels,4620,500,Small combustion - Commercial/institutional - Mobile,I
+1.A.4.a.ii,Off-road vehicles and other machinery,Solid fuels,4620,100,Small combustion - Commercial/institutional - Mobile,I
+1.A.4.b.ii,Off-road vehicles and other machinery,Biomass,4630,400,Small combustion - Residential - Household and gardening,I
+1.A.4.b.ii,Off-road vehicles and other machinery,Gaseous fuels,4630,300,Small combustion - Residential - Household and gardening,I
+1.A.4.b.ii,Off-road vehicles and other machinery,Liquid fuels,4630,230,Small combustion - Residential - Household and gardening,I
+1.A.4.b.ii,Off-road vehicles and other machinery,Other fossil fuels,4630,500,Small combustion - Residential - Household and gardening,I
+1.A.4.b.ii,Off-road vehicles and other machinery,Solid fuels,4630,100,Small combustion - Residential - Household and gardening,I
+1.A.3.e,Other transportation,Biomass,4640,400,Other mobile combustion,I
+1.A.3.e,Other transportation,Gaseous fuels,4640,300,Other mobile combustion,I
+1.A.3.e,Other transportation,Liquid fuels,4640,250,Other mobile combustion,I
+1.A.3.e,Other transportation,Other fossil fuels,4640,500,Other mobile combustion,I
+1.A.3.e,Other transportation,Solid fuels,4640,100,Other mobile combustion,I
+1.A.3.e.ii.Aircraft support vehicles,Aircraft support vehicles,Liquid fuels,4640,230,Other mobile combustion,I
+1.A.3.e.ii.Off-road transport,Off-road transport,Biomass,4640,400,Other mobile combustion,I
+1.A.3.e.ii.Off-road transport,Off-road transport,Gaseous fuels,4640,300,Other mobile combustion,I
+1.A.3.e.ii.Off-road transport,Off-road transport,Liquid fuels,4640,250,Other mobile combustion,I
+1.A.3.e.ii.Off-road transport,Off-road transport,Other fossil fuels,4640,500,Other mobile combustion,I
+1.A.3.e.ii.Off-road transport,Off-road transport,Solid fuels,4640,100,Other mobile combustion,I
+1.A.3.e.ii.Off-road vehicles and other machinery,Off-road vehicles and other machinery,Biomass,4640,400,Other mobile combustion,I
+1.A.3.e.ii.Off-road vehicles and other machinery,Off-road vehicles and other machinery,Gaseous fuels,4640,300,Other mobile combustion,I
+1.A.3.e.ii.Off-road vehicles and other machinery,Off-road vehicles and other machinery,Liquid fuels,4640,250,Other mobile combustion,I
+1.A.3.e.ii.Off-road vehicles and other machinery,Off-road vehicles and other machinery,Other fossil fuels,4640,500,Other mobile combustion,I
+1.A.3.e.ii.Off-road vehicles and other machinery,Off-road vehicles and other machinery,Solid fuels,4640,100,Other mobile combustion,I
+1.A.3.e.ii.Other non-specified,Other non-specified,Biomass,4640,400,Other mobile combustion,I
+1.A.3.e.ii.Other non-specified,Other non-specified,Gaseous fuels,4640,300,Other mobile combustion,I
+1.A.3.e.ii.Other non-specified,Other non-specified,Liquid fuels,4640,250,Other mobile combustion,I
+1.A.3.e.ii.Other non-specified,Other non-specified,Other fossil fuels,4640,500,Other mobile combustion,I
+1.A.3.e.ii.Other non-specified,Other non-specified,Solid fuels,4640,100,Other mobile combustion,I
+1.A.5.b,Mobile,Aviation gasoline,4640,230,Other mobile combustion,I
+1.A.5.b,Mobile,Biomass,4640,400,Other mobile combustion,I
+1.A.5.b,Mobile,Diesel oil,4640,250,Other mobile combustion,I
+1.A.5.b,Mobile,Gaseous fuels,4640,300,Other mobile combustion,I
+1.A.5.b,Mobile,Gasoline,4640,230,Other mobile combustion,I
+1.A.5.b,Mobile,Jet kerosine,4640,240,Other mobile combustion,I
+1.A.5.b,Mobile,Liquid fuels,4640,250,Other mobile combustion,I
+1.A.5.b,Mobile,Other fossil fuels,4640,500,Other mobile combustion,I
+1.A.5.b,Mobile,Solid fuels,4640,100,Other mobile combustion,I
+,,,4700,,International shipping,G
+,,,4710,,"International shipping, at sea",G
+,,,4720,,"International shipping, in ports",G
+1.A.4.a.i,Stationary combustion,Biomass,5100,400,Commercial/institutional,C
+1.A.4.a.i,Stationary combustion,Gaseous fuels,5100,300,Commercial/institutional,C
+1.A.4.a.i,Stationary combustion,Liquid fuels,5100,200,Commercial/institutional,C
+1.A.4.a.i,Stationary combustion,Other fossil fuels,5100,500,Commercial/institutional,C
+1.A.4.a.i,Stationary combustion,Peat,5100,140,Commercial/institutional,C
+1.A.4.a.i,Stationary combustion,Solid fuels,5100,100,Commercial/institutional,C
+1.A.4.b.i,Stationary combustion,Biomass,5200,400,Residential,C
+1.A.4.b.i,Stationary combustion,Gaseous fuels,5200,300,Residential,C
+1.A.4.b.i,Stationary combustion,Liquid fuels,5200,200,Residential,C
+1.A.4.b.i,Stationary combustion,Other fossil fuels,5200,500,Residential,C
+1.A.4.b.i,Stationary combustion,Peat,5200,140,Residential,C
+1.A.4.b.i,Stationary combustion,Solid fuels,5200,100,Residential,C
+1.A.4.b.iii.Residential,Residential,Biomass,5200,400,Residential,C
+1.A.4.b.iii.Residential,Residential,Gaseous fuels,5200,300,Residential,C
+1.A.4.b.iii.Residential,Residential,Liquid fuels,5200,200,Residential,C
+1.A.4.b.iii.Residential,Residential,Other fossil fuels,5200,500,Residential,C
+1.A.4.b.iii.Residential,Residential,Peat,5200,140,Residential,C
+1.A.4.b.iii.Residential,Residential,Solid fuels,5200,100,Residential,C
+1.A.4.c.i,Stationary,Biomass,5300,400,Agriculture/Forestry/Fishing,C
+1.A.4.c.i,Stationary,Gaseous fuels,5300,300,Agriculture/Forestry/Fishing,C
+1.A.4.c.i,Stationary,Liquid fuels,5300,200,Agriculture/Forestry/Fishing,C
+1.A.4.c.i,Stationary,Other fossil fuels,5300,500,Agriculture/Forestry/Fishing,C
+1.A.4.c.i,Stationary,Peat,5300,140,Agriculture/Forestry/Fishing,C
+1.A.4.c.i,Stationary,Solid fuels,5300,100,Agriculture/Forestry/Fishing,C
+1.A.5.a,Stationary,Biomass,5400,400,Other stationary combustion,C
+1.A.5.a,Stationary,Gaseous fuels,5400,300,Other stationary combustion,C
+1.A.5.a,Stationary,Liquid fuels,5400,200,Other stationary combustion,C
+1.A.5.a,Stationary,Other fossil fuels,5400,500,Other stationary combustion,C
+1.A.5.a,Stationary,Peat,5400,140,Other stationary combustion,C
+1.A.5.a,Stationary,Solid fuels,5400,100,Other stationary combustion,C
+,,,6100,,Enteric fermentation,K
+3(I).A.1,Cattle(1),,6110,0,Enteric fermentation - Cattle,K
+3(I).A.2,Sheep,,6120,0,Enteric fermentation - Sheep,K
+3(I).A.3,Swine,,6130,0,Enteric fermentation - Swine,K
+3(I).A.4,Other livestock,,6140,0,Enteric fermentation - Other animals,K
+,,,6200,,Manure management,K
+3(I).B.1,Cattle(1),,6210,0,Manure management - Cattle,K
+,,,6211,,Manure management - Cattle - dairy,K
+,,,6212,,Manure management - Cattle - non-dairy,K
+3(I).B.2,Sheep,,6220,0,Manure management - Sheep,K
+3(I).B.3,Swine,,6230,0,Manure management - Swine,K
+3(I).B.4,Other livestock,,6240,0,Manure management - other animals,K
+,,,6241,,Manure management - Buffalo,K
+,,,6242,,Manure management - Goats,K
+,,,6243,,Manure management - Horses,K
+,,,6244,,Manure management - Mules and asses,K
+,,,6245,,Manure management - Poultry,K
+,,,6246,,Manure management - Other animals,K
+,,,6300,,Application of manure and fertilizer,L
+3.D.a.1,Inorganic N fertilizers(3),,6310,0,Inorganic N-fertilizers (includes also urea application),L
+3.D.a.2.a,Animal manure applied to soils,,6320,0,Animal manure applied to soils,L
+3.D.a.2.b,Sewage sludge applied to soils,,6330,0,Sewage sludge applied to soils,L
+3.D.a.2.c,Other organic fertilizers applied to soils,,6340,0,Other organic fertilisers applied to soils (including compost),L
+3.D.a.3,Urine and dung deposited by grazing animals,,6350,0,Urine and dung deposited by grazing animals,L
+3.D.a.4,Crop residues,,6360,0,Crop residues applied to soils,L
+,,,6400,,Other agricultural soils,L
+3.D.a.5,Mineralization/immobilization associated with loss/gain of soil organic matter (4)(5),,6410,0,Indirect emissions from managed soils,L
+3.D.a.6,Cultivation of organic soils (i.e. histosols)(2),,6410,0,Indirect emissions from managed soils,L
+3.D.a.7,Other,,6410,0,Indirect emissions from managed soils,L
+3.D.b.1,Atmospheric deposition(6),,6410,0,Indirect emissions from managed soils,L
+3.D.b.2,Nitrogen leaching and run-off,,6410,0,Indirect emissions from managed soils,L
+,,,6420,,"Farm-level agricultural operations including storage, handling and transport of agricultural products",L
+,,,6430,,"Off-farm storage, handling and transport of bulk agricultural products",L
+,,,6440,,Cultivated crops,L
+,,,6450,,Use of pesticides,L
+,,,6500,,Other agriculture,L
+3.C,Rice cultivation,,6510,0,Rice cultivation,L
+3.E,Prescribed burning of savannas,,6520,0,Field burning of agricultural residues,L
+3.F,Field burning of agricultural residues,,6520,0,Field burning of agricultural residues,L
+3.G,Liming,,6530,0,Liming,L
+3.H,Urea application,,6540,0,Urea application,L
+3.I,Other carbon-containing fertilizers,,6550,0,Other carbon-containing fertilizers,L
+3(I).B.5,Indirect N2O emissions,,6560,0,Other,L
+3.J,Other (please specify),,6560,0,Other,L
+,,,7100,,Landfills,J
+5.A.1,Managed waste disposal sites,,7110,0,Managed waste disposal sites,J
+5.A.2,Unmanaged waste disposal sites,,7120,0,Unmanaged waste disposal sites,J
+5.A.3,Uncategorized waste disposal sites,,7130,0,Uncategorized waste disposal sites,J
+,,,7200,,Composting and anaerobic digestion,J
+5.B.1,Composting,,7210,0,Composting,J
+5.B.2,Anaerobic digestion at biogas facilities,,7220,0,Anaerobic digestion at biogas facilities,J
+,,,7300,,Waste incineration,J
+5.C.1,Waste incineration,,7310,0,Municipal waste incineration,J
+,,,7320,,Industrial waste incineration,J
+,,,7330,,Hazardous waste incineration,J
+,,,7340,,Clinical waste incineration,J
+,,,7350,,Sewage sludge incineration,J
+,,,7360,,Cremation,J
+,,,7370,,Other waste incineration (please specify in the IIR),J
+5.C.2,Open burning of waste,,7400,0,Open burning of waste,J
+,,,7500,,Waste water treatment,J
+5.D.1,Domestic wastewater,,7510,0,Domestic wastewater,J
+5.D.2,Industrial wastewater,,7520,0,Industrial wastewater,J
+5.D.3,Other (as specified in table 5.D),,7530,0,Other wastewater,J
+,,,7600,,Other waste,J
+,,,7610,,Other waste - bbq and tobacco,J
+5.E,Other (please specify),,7620,0,Other waste - other,J

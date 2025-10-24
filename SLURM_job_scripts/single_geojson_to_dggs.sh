@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=dggs_single_region
-#SBATCH --output=log/dggs_single_region.out
-#SBATCH --error=log/dggs_single_region.err
+#SBATCH --output=log/dggs_single_regionm.out
+#SBATCH --error=log/dggs_single_regionm.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=40
 #SBATCH --time=24:00:0
 #SBATCH --mem=80G
-#SBATCH --partition=cpu2019
+#SBATCH --partition=cpu2021
 #SBATCH --mail-user=mingke.li@ucalgary.ca
 #SBATCH --mail-type=END,FAIL
 
@@ -25,7 +25,10 @@ conda activate netcdf_dggs_converter
 # Set Python path and environment variables
 export PYTHON_PATH="/home/mingke.li/miniconda3/envs/netcdf_dggs_converter/bin/python"
 export OMP_NUM_THREADS=1
-export NUM_CORES=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export NUM_CORES=${SLURM_CPUS_PER_TASK}
 
 # Create log directory
 mkdir -p log
@@ -33,25 +36,30 @@ mkdir -p log
 echo "Running single-region DGGS conversion"
 echo "Start time: $(date)"
 
-# Parameters (override via environment or edit here)
-: ${GRID_TYPE:=rhealpix}
-: ${LEVEL:=10}
-: ${INPUT_PATH:=data/geojson/newyorkstate.geojson}
-: ${OUTPUT_DIR:=data/geojson/regional_grid}
-: ${OUT_FORMAT:=parquet}   # parquet | geojsonl | geojsonl.gz | geojson | geojson.gz
-: ${TILE_DEG:=2.0}
-: ${BATCH_SIZE:=10000}
+# Parameters (override via environment or edit here). Leave empty to use Python defaults.
+: ${GRID_TYPE:=}
+: ${LEVEL:=}
+: ${INPUT_PATH:=}
+: ${OUTPUT_DIR:=}
+: ${OUT_FORMAT:=}   # parquet | geojsonl | geojsonl.gz | geojson | geojson.gz
+: ${TILE_DEG:=}
+: ${BATCH_SIZE:=}
 : ${DEDUP:=1}              # 1 enables --dedup
 
-CMD_ARGS=(
-  --grid "$GRID_TYPE"
-  --level "$LEVEL"
-  --input "$INPUT_PATH"
-  --output-dir "$OUTPUT_DIR"
-  --format "$OUT_FORMAT"
-  --tile-deg "$TILE_DEG"
-  --batch-size "$BATCH_SIZE"
-)
+CMD_ARGS=()
+
+# Only pass flags that are explicitly set; otherwise rely on Python script defaults
+[ -n "$GRID_TYPE" ] && CMD_ARGS+=(--grid "$GRID_TYPE")
+[ -n "$LEVEL" ] && CMD_ARGS+=(--level "$LEVEL")
+[ -n "$INPUT_PATH" ] && CMD_ARGS+=(--input "$INPUT_PATH")
+[ -n "$OUTPUT_DIR" ] && CMD_ARGS+=(--output-dir "$OUTPUT_DIR")
+[ -n "$OUT_FORMAT" ] && CMD_ARGS+=(--format "$OUT_FORMAT")
+[ -n "$TILE_DEG" ] && CMD_ARGS+=(--tile-deg "$TILE_DEG")
+[ -n "$BATCH_SIZE" ] && CMD_ARGS+=(--batch-size "$BATCH_SIZE")
+
+# Always enable parallelism and low-memory dataset mode
+CMD_ARGS+=(--workers "$SLURM_CPUS_PER_TASK")
+CMD_ARGS+=(--parquet-dataset)
 
 if [ "$DEDUP" = "1" ]; then
   CMD_ARGS+=(--dedup)

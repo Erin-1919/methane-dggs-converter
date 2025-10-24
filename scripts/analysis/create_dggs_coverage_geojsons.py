@@ -40,6 +40,7 @@ SIMPLIFY_TOLERANCE = 0.01  # degrees; adjust if needed
 DATASET_FILES = [
     "EDGAR_DGGS_methane_emissions_ALL_SECTORS_1970_2022",
     "GFEI_DGGS_methane_emissions_ALL_FILES",
+    "Europe_DGGS_methane_emissions_ALL_FILES",
     "US_DGGS_methane_emissions_ALL_FILES",
     "Canada_DGGS_methane_emissions_ALL_FILES",
     "Mexico_DGGS_methane_emissions_ALL_FILES",
@@ -74,6 +75,10 @@ def geometry_path_for_dataset(dataset_name: str) -> Tuple[Path, str]:
     # NYS special regional parquet
     if dataset_name.startswith("NYS_"):
         return (GEOMETRY_BASE_DIR / "regional_grid" / "newyorkstate_grid_res10.parquet", "regional_parquet")
+
+    # Europe special regional parquet (absolute path on HPC)
+    if dataset_name.startswith("Europe_"):
+        return (Path("/home/mingke.li/methane_grid_calculation_ARC/data/geojson/regional_grid/europe_grid_res7.parquet"), "regional_parquet")
 
     # Country-specific mapping (explicit paths). Fallbacks use common <Country>_<ISO>_grid.geojson names
     country_paths: Dict[str, str] = {
