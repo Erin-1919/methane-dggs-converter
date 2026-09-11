@@ -78,3 +78,6 @@ scripts/test_scripts/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Manuscript and figures (not synced)
+paper/
