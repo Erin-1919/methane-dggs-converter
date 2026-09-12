@@ -1,0 +1,17 @@
+﻿Inventory,Native coding scheme,Variables,1:1,many:1,1:many,retained,Judgement,Share 1:1 (%)
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,26,12,4,10,0,0,46.2
+GFEI,Descriptive variable names,18,12,6,0,0,18,66.7
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,12,6,0,6,0,0,50.0
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,26,22,2,2,0,0,84.6
+U.S. Oil and Gas,Single unlabelled emission field,1,1,0,0,0,1,100.0
+Canada,CRT codes embedded in variable names,75,43,32,0,0,0,57.3
+Mexico,CRT codes embedded in variable names,55,33,16,6,0,0,60.0
+CMS Canada,Descriptive variable names,5,5,0,0,0,5,100.0
+CMS Mexico,Descriptive variable names,5,5,0,0,0,5,100.0
+China CHN-CH4,Descriptive variable names,8,8,0,0,0,8,100.0
+China coal mine (SACMS),Single unlabelled emission field,1,1,0,0,0,1,100.0
+Switzerland,Descriptive variable names,8,3,0,1,4,4,37.5
+New York State,IPCC 1996 codes embedded in variable names,82,20,62,0,0,0,24.4
+Australia coal mine,Descriptive variable names,1,1,0,0,0,1,100.0
+India coal mine,Descriptive variable names,1,1,0,0,0,1,100.0
+All inventories,,324,173,122,25,4,44,53.4

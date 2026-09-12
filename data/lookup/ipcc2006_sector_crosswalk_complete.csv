@@ -1,0 +1,325 @@
+﻿Inventory,Native coding scheme,Original variable,Native code,IPCC 2006 code,Mapping,Basis,Note
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,AGS,4C+4D1+4D2+4D4,3C2+3C3+3C4+3C7,1:many,crosswalk,Source does not separate the 4 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,AWB,4F,3C1b,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,CHE,2B,2B,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,ENE,1A1a,1A1a,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,ENF,4A,3A1,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,IDE,7B+7C,5A,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,IND,1A2,1A2,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,IRO,2C1a+2C1c+2C1d+2C1e+2C1f+2C2,2C1+2C2,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,MNM,4B,3A2,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,N2O,4D3,3C5+3C6,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,PRO_COAL,1B1a,1B1a,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,PRO_GAS,1B2c,1B2bi+1B2bii,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,PRO_OIL,1B2a1+1B2a2+1B2a3+1B2a4,1B2aiii2+1B2aiii3,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,PRU_SOL,3,2D3+2E+2F+2G,1:many,crosswalk,Source does not separate the 4 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,RCO,1A4,1A4+1A5,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,REF_TRF,1A1b+1A1c+1A5b1+1B1b+1B2a5+1B2a6+1B2b5+2C1b,1A1b+1A1ci+1A1cii+1A5biii+1B1b+1B2aiii6+1B2biii3+1B1c,1:many,crosswalk,Source does not separate the 8 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,SWD_INC,6C+6Dhaz,4C,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,SWD_LDF,6A+6Dcom,4A+4B,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Aviation_CDS,1A3a_CDS,1A3a,many:1,crosswalk,Summed with the other variables sharing this code.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Aviation_CRS,1A3a_CRS,1A3a,many:1,crosswalk,Summed with the other variables sharing this code.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Aviation_LTO,1A3a_LTO,1A3a,many:1,crosswalk,Summed with the other variables sharing this code.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Aviation_SPS,1A3a_SPS,1A3a,many:1,crosswalk,Summed with the other variables sharing this code.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Other,1A3c+1A3e,1A3c+1A3e,1:many,crosswalk,Source does not separate the 2 categories.
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TNR_Ship,1A3d+1C2,1A3d,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,TRO,1A3b,1A3b,1:1,crosswalk,
+EDGAR v8.0,EDGAR sector abbreviations with IPCC 1996 codes,WWT,6B,4D,1:1,crosswalk,
+GFEI,Descriptive variable names,Coal,,1B1,1:1,judgement,
+GFEI,Descriptive variable names,Gas_Distribution,,1B2biii5,1:1,judgement,
+GFEI,Descriptive variable names,Gas_Exploration,,1B2biii1,1:1,judgement,
+GFEI,Descriptive variable names,Gas_LNG,,1B2biii6,1:1,judgement,
+GFEI,Descriptive variable names,Gas_Processing_flare,,1B2bii,many:1,judgement,Summed with the other variables sharing this code.
+GFEI,Descriptive variable names,Gas_Processing_fug,,1B2biii3,1:1,judgement,
+GFEI,Descriptive variable names,Gas_Production_flare,,1B2bii,many:1,judgement,Summed with the other variables sharing this code.
+GFEI,Descriptive variable names,Gas_Production_fug,,1B2biii2,1:1,judgement,
+GFEI,Descriptive variable names,Gas_Storage,,1B2biii4,many:1,judgement,Summed with the other variables sharing this code.
+GFEI,Descriptive variable names,Gas_Transmission_fug,,1B2biii4,many:1,judgement,Summed with the other variables sharing this code.
+GFEI,Descriptive variable names,Gas_Transmission_vent,,1B2bi,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Exploration,,1B2aiii1,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Production_flare,,1B2aii,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Production_fug,,1B2aiii2,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Production_vent,,1B2ai,many:1,judgement,Summed with the other variables sharing this code.
+GFEI,Descriptive variable names,Oil_Refining,,1B2aiii4,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Transport_fug,,1B2aiii3,1:1,judgement,
+GFEI,Descriptive variable names,Oil_Transport_vent,,1B2ai,many:1,judgement,Summed with the other variables sharing this code.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,A_PublicPower,1.A.1.a,1A1a,1:1,crosswalk,
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,B_Industry,1.A.1.b+1.A.1.c+1.A.2+1.B.1.b+2.A+2.B+2.C+2.H,1A1b+1A1c+1A2+1B1c+2A+2B+2C+2H,1:many,crosswalk,Source does not separate the 8 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,C_OtherStationaryComb,1.A.4+1.A.5.a,1A4+1A5a,1:many,crosswalk,Source does not separate the 2 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,D_Fugitives,1.B.1.a+1.B.1.c+1.B.2+1.C,1B1a+1B1b+1B2+1C,1:many,crosswalk,Source does not separate the 4 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,E_Solvents,2.D+2.G.3+2.G.4+2.H.3,2D+2G3+2G4+2H3,1:many,crosswalk,Source does not separate the 4 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,F_RoadTransport,1.A.3.b,1A3b,1:1,crosswalk,
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,G_Shipping,1.A.3.d+1.A.4.c.iii,1A3dii+1A4ciii,1:many,crosswalk,Source does not separate the 2 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,H_Aviation,1.A.3.a,1A3aii,1:1,crosswalk,
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,I_OffRoad,1.A.3.c+1.A.4.c.ii+1.A.2.g.vii+1.A.4.a.ii+1.A.4.b.ii+1.A.3.e+1.A.5.b,1A3c+1A4cii+1A3e+1A5b,1:many,crosswalk,Source does not separate the 4 categories.
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,J_Waste,5,4,1:1,crosswalk,"CRF sector 5 corresponds to IPCC 2006 sector 4, following the renumbering of the waste sector between the 1996 and 2006 guidelines."
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,K_AgriLivestock,3.A+3.B,3A,1:1,crosswalk,
+CAMS-REG v8.1,GNFR14 sectors with CRF codes,L_AgriOther,3.D+3.E+3.F+3.J+3.H+3.I+3.J,3C,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1A_Combustion_Mobile,1A3,1A3,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1A_Combustion_Stationary,1A1+1A2,1A1+1A2,1:many,crosswalk,Source does not separate the 2 categories.
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B1a_Abandoned_Coal,1B1ai3,1B1ai3,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B1a_Surface_Coal,1B1aii,1B1aii,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B1a_Underground_Coal,1B1ai,1B1ai,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2a_Petroleum_Systems_Exploration,1B2ai,1B2aiii1,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2a_Petroleum_Systems_Production,1B2aii,1B2aiii2,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2a_Petroleum_Systems_Refining,1B2aiv,1B2aiii4,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2a_Petroleum_Systems_Transport,1B2aiii,1B2aiii3,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2ab_Abandoned_Oil_Gas,1B2avi1+1B2bvi2,1B2aiii+1B2biii,1:many,crosswalk,Source does not separate the 2 categories.
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2b_Natural_Gas_Distribution,1B2bv,1B2biii5,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2b_Natural_Gas_Exploration,1B2bi,1B2biii1,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2b_Natural_Gas_Processing,1B2biii,1B2biii3,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2b_Natural_Gas_Production,1B2bii,1B2biii2,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_1B2b_Natural_Gas_TransmissionStorage,1B2biv,1B2biii4,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_2B8_Industry_Petrochemical,2B8,2B8,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_2C2_Industry_Ferroalloy,2C2,2C2,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_3A_Enteric_Fermentation,3A,3A1,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_3B_Manure_Management,3B,3A2,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_3C_Rice_Cultivation,3C,3C7,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_3F_Field_Burning,3F,3C1,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_5A1_Landfills_Industrial,5A1,4A,many:1,crosswalk,Summed with the other variables sharing this code.
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_5A1_Landfills_MSW,5A1,4A,many:1,crosswalk,Summed with the other variables sharing this code.
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_5B1_Composting,5B1,4B,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_5D_Wastewater_Treatment_Domestic,5D1,4D1,1:1,crosswalk,
+U.S. Anthropogenic (Gridded GHGI),CRT codes embedded in variable names,emi_ch4_5D_Wastewater_Treatment_Industrial,5D2,4D2,1:1,crosswalk,
+U.S. Oil and Gas,Single unlabelled emission field,mean_ch4_kgh,,1B2,1:1,judgement,
+Canada,CRT codes embedded in variable names,1A (off-road combustion),1A2gvii,1A3eii,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A (other minor combustion),1A4,1A4,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A1a (electricity generation combustion),1A1ai,1A1ai,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A1b (oil refining),1A1b,1A1b,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A1cii (gas processing),1A1cii,1A1cii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1A1cii (gas production),1A1cii,1A1cii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1A1cii (offshore),1A1cii,1A1cii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1A1cii (oil production),1A1cii,1A1cii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1A1cii (oil sands),1A1cii,1A1cii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1A3b (road transport combustion),1A3b,1A3b,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A3ei (oil and gas transport),1A3ei,1A3ei,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1A4bi residential combustion (total),1A4b,1A4b,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B1 (abandoned),1B1ai3,1B1ai3,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B1 (surface),1B1aii,1B1aii,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B1 (underground),1B1ai,1B1ai,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2aii (oil production),1B2aii,1B2aiii2,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2aii (oil sands),1B2aii,1B2aiii2,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2aiii (oil transport),1B2aiii,1B2aiii3,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2aiv (oil refining),1B2aiv,1B2aiii4,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2avi (oil abandoned),1B2avi,1B2aiii6,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2bii (gas production),1B2bii,1B2biii2,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2biii (gas processing),1B2biii,1B2biii3,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2biv (gas storage),1B2biv,1B2biii4,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2biv (gas transmission),1B2biv,1B2biii4,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2bv (gas distribution),1B2bv,1B2biii5,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2bvi (gas other),1B2bvi,1B2biii6,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,1B2ci1 (oil production),1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci1 (oil sands),1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci1 (oil transport),1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci2 (gas distribution),1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci2 (gas processing),1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci2 (gas production),1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci2 (gas storage),1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2ci2 (gas transmission),1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii1 (oil production),1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii1 (oil refining),1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii1 (oil sands),1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii1 (oil transport),1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii2 (gas distribution),1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii2 (gas processing),1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii2 (gas production),1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii2 (gas storage),1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,1B2cii2 (gas transmission),1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,2B8 (petrochemicals),2B8,2B8,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,2C1b (pig iron),2C1b,2C1,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Buffalo,3A4a,3A1b,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Camels,3A4b,3A1e,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Dairy Cattle,3A1a,3A1ai,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Deer,3A4c,3A1j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Goats,3A4d,3A1d,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Horses,3A4e,3A1f,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Mules and Asses,3A4f,3A1g,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Non-Dairy Cattle,3A1b,3A1aii,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Other,3A4h,3A1j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Sheep,3A2,3A1c,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3A (enteric fermentation) - Swine,3A3,3A1h,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Buffalo,3B4a,3A2b,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Camels,3B4b,3A2e,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Dairy Cattle,3B1a,3A2ai,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Deer,3B4c,3A2j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3B (manure management) - Fur-bearing Animals,3B4hiv,3A2j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3B (manure management) - Goats,3B4d,3A2d,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Horses,3B4e,3A2f,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Mules and Asses,3B4f,3A2g,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Non-Dairy Cattle,3B1b,3A2aii,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Other,3B4h,3A2j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3B (manure management) - Poultry,3B4g,3A2i,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Rabbit,3B4hi,3A2j,many:1,crosswalk,Summed with the other variables sharing this code.
+Canada,CRT codes embedded in variable names,3B (manure management) - Sheep,3B2,3A2c,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3B (manure management) - Swine,3B3,3A2h,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,3F (field burning of agricultural residues),3F,3C1,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,5A1a (managed solid waste),5A1,4A1,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,5A2 (unmanaged solid waste),5A2,4A2,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,5BC (biological treatment and incineration),5B+5C,4B,1:1,crosswalk,
+Canada,CRT codes embedded in variable names,5D wastewater (total),5D,4D,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1A1a,1A1a,1A1a,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1A2i,1A2i,1A2i,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,"emis_ch4_1A3a,c,d",1A3a+1A3c+1A3d,1A3a+1A3c+1A3d,1:many,crosswalk,Source does not separate the 3 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_1A3b,1A3b,1A3b,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1A4a_1A2k,1A4a+1A2gv,1A4a+1A2k,1:many,crosswalk,Source does not separate the 2 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_1A4b,1A4b,1A4b,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1A4c,1A4c,1A4c,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1A_other_industries,1A2g,1A1cii,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B1,1B1,1B1,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2ai_LNGterminals,1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2ai_oilrefining,1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2ai_production,1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2ai_transport,1B2ci1,1B2ai,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aii_LPGpipetransport,1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aii_oilrefining,1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aii_production,1B2cii1,1B2aii,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,"emis_ch4_1B2aiii1,2",1B2ai+1B2aii,1B2aiii1+1B2aiii2,1:many,crosswalk,Source does not separate the 2 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aiii3,1B2aiii,1B2aiii3,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aiii4,1B2aiv,1B2aiii4,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2aiii5,1B2av,1B2aiii5,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2bi_gasprocessing,1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2bi_production,1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2bi_transmission,1B2ci2,1B2bi,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2bii_gasprocessing,1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2bii_production,1B2cii2,1B2bii,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,"emis_ch4_1B2biii1,2,6",1B2bi+1B2bii+1B2bvi,1B2biii1+1B2biii2+1B2biii6,1:many,crosswalk,Source does not separate the 3 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2biii3,1B2biii,1B2biii3,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2biii4,1B2biv,1B2biii4,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_1B2biii5,1B2bv,1B2biii5,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_2B_total,2B,2B,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A1a,3A1,3A1a,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A1c,3A2,3A1c,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A1d,3A4d,3A1d,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,"emis_ch4_3A1f,g",3A4e+3A4f,3A1f+3A1g,1:many,crosswalk,Source does not separate the 2 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_3A1h,3A3,3A1h,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A2a,3B1,3A2a,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A2c,3B2,3A2c,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A2d,3B4d,3A2d,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,"emis_ch4_3A2f,g",3B4e+3B4f,3A2f+3A2g,1:many,crosswalk,Source does not separate the 2 categories.
+Mexico,CRT codes embedded in variable names,emis_ch4_3A2h,3B3,3A2h,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3A2i,3B4g,3A2i,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3C1a,3E,3C1a,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3C1b,3F,3C1b,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3C1c,3E2,3C1c,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_3C7,3C,3C7,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4A1,5A1,4A1,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4A2,5A2,4A2,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4A3,5A3,4A3,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4B_total,5B,4B,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4C1,5C1,4C1,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4C2,5C2,4C2,1:1,crosswalk,
+Mexico,CRT codes embedded in variable names,emis_ch4_4D1_no_treatment,5D1,4D1,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_4D1_treatment,5D1,4D1,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_4D2_no_treatment,5D2,4D2,many:1,crosswalk,Summed with the other variables sharing this code.
+Mexico,CRT codes embedded in variable names,emis_ch4_4D2_treatment,5D2,4D2,many:1,crosswalk,Summed with the other variables sharing this code.
+CMS Canada,Descriptive variable names,CH4_FLX_CA_Gas_Distribution,,1B2biii5,1:1,judgement,
+CMS Canada,Descriptive variable names,CH4_FLX_CA_Gas_Oil,,1B2a,1:1,judgement,
+CMS Canada,Descriptive variable names,CH4_FLX_CA_Gas_Processing,,1B2biii3,1:1,judgement,
+CMS Canada,Descriptive variable names,CH4_FLX_CA_Gas_Production,,1B2biii2,1:1,judgement,
+CMS Canada,Descriptive variable names,CH4_FLX_CA_Gas_Transmission,,1B2biii4,1:1,judgement,
+CMS Mexico,Descriptive variable names,CH4_FLX_MX_Gas_Distribution,,1B2biii5,1:1,judgement,
+CMS Mexico,Descriptive variable names,CH4_FLX_MX_Gas_Processing,,1B2biii3,1:1,judgement,
+CMS Mexico,Descriptive variable names,CH4_FLX_MX_Gas_Production,,1B2biii2,1:1,judgement,
+CMS Mexico,Descriptive variable names,CH4_FLX_MX_Gas_Transmission,,1B2biii4,1:1,judgement,
+CMS Mexico,Descriptive variable names,CH4_FLX_MX_Oil,,1B2a,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Biomass_biofuels,,3C1,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Coal_Exploitation,,1B1a,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Fossil_Energy_Consumed,,1A,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Landfills,,4A,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Livestock,,3A,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Oil_Natural_Gas,,1B2,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Rice_Cultivation,,3C7,1:1,judgement,
+China CHN-CH4,Descriptive variable names,Methane_Wastewater,,4D,1:1,judgement,
+China coal mine (SACMS),Single unlabelled emission field,emi,,1B1a,1:1,judgement,
+Switzerland,Descriptive variable names,agriculture,,3A1+3A2,1:many,judgement,Source does not separate the 2 categories.
+Switzerland,Descriptive variable names,forest,,,retained,retained,"Natural flux, retained under the original label."
+Switzerland,Descriptive variable names,gas,,1B2b,1:1,judgement,
+Switzerland,Descriptive variable names,lake,,,retained,retained,"Natural flux, retained under the original label."
+Switzerland,Descriptive variable names,landfill,,4A,1:1,judgement,
+Switzerland,Descriptive variable names,wastewater,,4D,1:1,judgement,
+Switzerland,Descriptive variable names,wetland,,,retained,retained,"Natural flux, retained under the original label."
+Switzerland,Descriptive variable names,wild_animal,,,retained,retained,"Natural flux, retained under the original label."
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A1a_Combustion_Electricity_Generation_Coal,1A1a,1A1a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A1a_Combustion_Electricity_Generation_Distillate_Fuel,1A1a,1A1a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A1a_Combustion_Electricity_Generation_Natural_Gas,1A1a,1A1a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A1a_Combustion_Electricity_Generation_Residual_Oil,1A1a,1A1a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A1a_Combustion_Electricity_Generation_Wood,1A1a,1A1a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Coal,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Distillate_Fuel,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Kerosene,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Liquid_Petroleum_Gas,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Natural_Gas,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Petroleum_Coke,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Residual_Oil,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Special_Naphthas,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A2_Combustion_Industry_Wood,1A2,1A2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3a_Combustion_Civil_Aviation,1A3a,1A3a,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3b_Combustion_Road_Compressed_Natural_Gas,1A3b,1A3b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3b_Combustion_Road_Diesel,1A3b,1A3b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3b_Combustion_Road_Gasoline,1A3b,1A3b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3c_Combustion_Railways,1A3c,1A3c,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3d_Combustion_Navigation,1A3d,1A3d,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e1_Combustion_Pipeline_Transport_Natural_Gas,1A3e1,1A3ei,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Agriculture,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Commercial_Industrial,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Construction,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Lawn_Garden,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Military,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Misc_Diesel,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Misc_Gasoline,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Public_Nonhighway,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A3e2_Combustion_Mobile_Offroad_Recreational_Vehicles,1A3e2,1A3eii,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Distillate_Fuel,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Kerosene,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Liquid_Petroleum_Gas,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Natural_Gas,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Residual_Oil,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4a_Combustion_Commercial_Wood,1A4a,1A4a,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4b_Combustion_Residential_Distillate_Fuel,1A4b,1A4b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4b_Combustion_Residential_Kerosene,1A4b,1A4b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4b_Combustion_Residential_Liquid_Petroleum_Gas,1A4b,1A4b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4b_Combustion_Residential_Natural_Gas,1A4b,1A4b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A4b_Combustion_Residential_Wood,1A4b,1A4b,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1A5a_Combustion_Stationary_Oil_gas_drill_rigs,1A5a,1A5a,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2a1_Oil_Mud_degassing,1B2a1,1B2aiii1,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2a1_Oil_Natural_Gas_Drilling_fugitives,1B2a1,1B2aiii1,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2a1_Oil_Well_completions,1B2a1,1B2aiii1,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2a2_Oil_Production,1B2a2,1B2aiii2,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2a4_Oil_Refining_Storage,1B2a4,1B2aiii4,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b1_Natural_Gas_High_producing_wells,1B2b1,1B2biii2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b1_Natural_Gas_Low_producing_wells,1B2b1,1B2biii2,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Compressor_Stations_Gathering,1B2b2,1B2biii4,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Compressor_Stations_Storage,1B2b2,1B2biii4,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Compressor_Stations_Transmission,1B2b2,1B2biii4,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Distribution_pipeline,1B2b2,1B2biii5,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Gathering_pipeline,1B2b2,1B2biii5,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b2_Natural_Gas_Transmission_pipeline,1B2b2,1B2biii5,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Commercial_customer_meters,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Other_Commercial_bldgs,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Residential_appliances,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Residential_buildings,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Residential_customer_meters,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_Restaurants_hospitals,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2b3_Natural_Gas_End_use_fugitives_LNG_storage,1B2b3,1B2biii6,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2d_Other_Abandoned_gas_wells,1B2d,1B3,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_1B2d_Other_Abandoned_oil_wells,1B2d,1B3,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_2C1_Iron_Steel_Production,2C1,2C1,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A10_Enteric_Fermentation_Deer_Elk_livestock,4A10,3A1j,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A1a_Enteric_Fermentation_Cattle_Dairy,4A1a,3A1ai,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A1b_Enteric_Fermentation_Cattle_Non_Dairy,4A1b,3A1aii,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A3_Enteric_Fermentation_Sheep,4A3,3A1c,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A4_Enteric_Fermentation_Goats,4A4,3A1d,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4A6_Enteric_Fermentation_Horses,4A6,3A1f,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B1a_Manure_Management_Cattle_Dairy,4B1a,3A2ai,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B1b_Manure_Management_Cattle_Non_Dairy,4B1b,3A2aii,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B6_Manure_Management_Horses,4B6,3A2f,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B8_Manure_Management_Swine,4B8,3A2h,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B9_Manure_Management_Chicken_manure_fertilizer,4B9,3A2i,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_4B9_Manure_Management_Chickens,4B9,3A2i,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_6A1_Landfills,6A1,4A1,1:1,crosswalk,
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_6B1_6B2_Domestic_Commercial_Industrial_Wastewater,6B1+6B2,4D,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_6B3_Wastewater_Septic_systems,6B3,4D,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_6B3_Wastewater_Sewer_emissions,6B3,4D,many:1,crosswalk,Summed with the other variables sharing this code.
+New York State,IPCC 1996 codes embedded in variable names,emi_ch4_6C_Waste_Incineration,6C,4C,1:1,crosswalk,
+Australia coal mine,Descriptive variable names,gridded_aus_emissions,,1B1a,1:1,judgement,
+India coal mine,Descriptive variable names,gridded_ind_emissions,,1B1a,1:1,judgement,
