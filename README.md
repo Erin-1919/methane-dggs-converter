@@ -152,6 +152,13 @@ Analysis scripts for post-processing and summarizing DGGS-converted datasets:
     - Uses configuration mappings for resolution and year range information
     - Optimized for large files with chunked reading
 
+24. **`build_sector_crosswalk.py`**
+    - Builds the complete original-variable to IPCC2006 sector crosswalk from `data/lookup/`
+    - Records the cardinality of each mapping (1:1, many:1, 1:many, retained) and the basis
+      on which the category was assigned (native, crosswalk, judgement)
+    - Covers 324 variables across the 15 converted datasets
+    - Writes `data/lookup/ipcc2006_sector_crosswalk_complete.csv` and a per-dataset summary
+
 ### 📁 `SLURM_job_scripts/`
 HPC job scripts for running conversions on cluster systems:
 
